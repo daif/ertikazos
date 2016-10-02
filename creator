@@ -1,0 +1,5 @@
+#!/usr/bin/env php
+<?php
+    $_SERVER['argv'] = array_merge(array('creator.php','creator'), array_slice($_SERVER['argv'], 1));
+    require_once(dirname(__FILE__).'/public/index.php');
+?>
