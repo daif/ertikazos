@@ -9,6 +9,7 @@
                 <?php echo make_form_open() ?>
                 <?php foreach ($this->user->forms('register') as $key => $input) { ?>
                     <div class="form-group">
+                        <?php echo make_label($input) ?>
                         <?php echo make_input($input) ?>
                     </div>
                 <?php } ?>

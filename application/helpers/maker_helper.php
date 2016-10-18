@@ -196,29 +196,16 @@ if ( ! function_exists('make_input'))
      *
      * @param   array   $input      Field input array
      * @param   array   $row        Field row array
-     * @param   boolean $no_label   if it's TRUE don't add label
      * @param   boolean $suffix     field name suffix
      * @return  string
      */
-    function make_input($input, $row = NULL, $no_label = FALSE, $suffix = FALSE)
+    function make_input($input, $row = NULL, $suffix = FALSE)
     {
-        $label  = '';
         $return = '';
         if( ! isset($input['rules']))    $input['rules']  = '';
         if( ! isset($input['type']))     $input['type']   = (preg_match('/in_list\[.*\]/', $input['rules']))?'select':'text';
-        if( ! isset($input['label']))    $input['label']  = $input['field'];
         if( ! isset($input['class']))    $input['class']  = '';
         if( ! isset($input['extra']))    $input['extra']  = 'class="form-control '.$input['class'].'" data-rules="'.$input['rules'].'"';
-
-        // try to find the translations for the input 
-        if(get_instance()->lang->has_line($input['field']))
-        {
-            $input['label'] = get_instance()->lang->line($input['field']);
-        }
-        elseif(get_instance()->lang->has_line($input['label']))
-        {
-            $input['label'] = get_instance()->lang->line($input['label']);
-        }
 
         // convert $row to array
         if(!is_array($row)) 
@@ -244,9 +231,6 @@ if ( ! function_exists('make_input'))
             $row[$input['field']] = get_input_value($input['field']);
         }
 
-        // set default value label
-        $value_label    = '';
-
         // hidden input
         if(preg_match('/hidden/i', $input['type']))
         {
@@ -256,7 +240,6 @@ if ( ! function_exists('make_input'))
         }
         elseif(preg_match('/password/i', $input['type']))
         {
-            $label  = make_label($input['label'], $input['field']);
             $return = form_password($field, '', $input['extra']);
             $value  = '';
 
@@ -264,14 +247,12 @@ if ( ! function_exists('make_input'))
         }
         elseif(preg_match('/upload|file/i',$input['type']))
         {
-            $label  = make_label($input['label'], $input['field']);
             $return = form_upload($field, $row[$input['field']], $input['extra']);
 
         // textarea input
         }
         elseif(preg_match('/textarea/i', $input['type']))
         {
-            $label  = make_label($input['label'], $input['field']);
             $return = form_textarea($field, $row[$input['field']], $input['extra']);
 
         // select input, accept query, hasOne, hasMany
@@ -350,16 +331,10 @@ if ( ! function_exists('make_input'))
                     if(is_object($result_row))
                     {
                         $options[$result_row->$model_field] = lang($result_row->{$hasone_model->getLabelName()});
-                        if($row[$input['field']] == $result_row->$model_field)
-                        {
-                            $value_label = $result_row->{$hasone_model->getLabelName()};
-                        }
-                    } else {
+                    }
+                    else
+                    {
                         $options[$result_row] = $result_row;
-                        if($row[$input['field']] == $result_row)
-                        {
-                            $value_label = $result_row;
-                        }
                     }
                 }
             }
@@ -369,7 +344,6 @@ if ( ! function_exists('make_input'))
             {
             }
 
-            $label  = make_label($input['label'], $input['field']);
             $return = form_dropdown($field, $options, $row[$input['field']], $input['extra']);
 
         }
@@ -393,7 +367,6 @@ if ( ! function_exists('make_input'))
                     }
                 }
             }
-            $label  = make_label($input['label'], $input['field']);
             $return = form_dropdown($field, $options, $row[$input['field']], $input['extra']);
         }
         elseif(preg_match('/select|dropdown/i', $input['type']))
@@ -416,23 +389,14 @@ if ( ! function_exists('make_input'))
                     $options[$list_value] = $list_value;
                 }
             }
-            $label  = make_label($input['label'], $input['field']);
             $return = form_dropdown($field, $options, $row[$input['field']], $input['extra']);
         }
         else
         {
-            $label  = make_label($input['label'], $input['field']);
             $return = form_input($field, $row[$input['field']], $input['extra']);
         }
 
-        if(!preg_match('/hidden/i', $input['type']) && !$no_label)
-        {
-            return $label."\n".$return;
-        }
-        else
-        {
-            return $return;
-        }
+        return $return;
     }
 }
 
@@ -634,15 +598,35 @@ if ( ! function_exists('make_label'))
     /**
      * Make Input Label Field
      *
-     * @param   string  The text to appear onscreen
-     * @param   string  The id the label applies to
-     * @param   string  Additional attributes
+     * @param   array   $input      Field input array
+     * @param   string  $attrs      Additional attributes array
      * @return  string
      */
-    function make_label($label_text = '', $id = '', $attributes = array())
+    function make_label($input, $attrs = array())
     {
-        $attributes = array('class'=>'control-label');
-        $label = form_label($label_text, $id, $attributes);
+        if( ! isset($input['field']))    $input['field'] = '';
+        if( ! isset($input['type']))     $input['type']  = 'text';
+        if( ! isset($input['label']))    $input['label'] = $input['field'];
+        if( ! isset($input['class']))    $input['class'] = '';
+        if( ! is_array($attrs))          $attrs          = array(); 
+
+        if(preg_match('/hidden/i', $input['type']))
+        {
+            return '';
+        }
+
+        // try to find the translations for the input 
+        if(get_instance()->lang->has_line($input['field']))
+        {
+            $input['label'] = get_instance()->lang->line($input['field']);
+        }
+        elseif(get_instance()->lang->has_line($input['label']))
+        {
+            $input['label'] = get_instance()->lang->line($input['label']);
+        }
+
+        $attrs['class'] = 'control-label ' .$input['class'];
+        $label = form_label($input['label'], $input['field'], $attrs);
         return $label;
     }
 }

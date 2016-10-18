@@ -4,6 +4,7 @@
         <?php echo make_form_open() ?>
         <?php foreach ($this->setting->forms('edit') as $key => $input) { ?>
             <div class="form-group">
+                <?php echo make_label($input) ?>
                 <?php echo make_input($input, $row) ?>
             </div>
         <?php } ?>
