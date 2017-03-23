@@ -36,6 +36,13 @@ class Setting_model extends ER_Model {
     public $primaryLabel = 'name';
 
     /**
+     * The default ordering parameters.
+     *
+     * @var string
+     */
+    public $orderBy = 'sort ASC, id ASC';
+
+    /**
      * The row permission.
      * @var integer
      */

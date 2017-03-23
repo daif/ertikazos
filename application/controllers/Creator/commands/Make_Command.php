@@ -1,6 +1,5 @@
 <?php
 /**
- * Make command class
  *
  * Make command class
  *
@@ -9,30 +8,7 @@
  * @category    Libraries
  */
 
-class Make_Command {
-
-    /**
-     * The CodeIgniter instance 
-     *
-     * @var object
-     */
-    public $CI = NULL;
-
-    /**
-     * Overloading variables
-     */
-    public function __get($name)
-    {
-        return (isset($this->CI->$name))?$this->CI->$name:NULL;
-    }
-
-    /**
-     * Overloading functions
-     */
-    public function __call($name, $arguments)
-    {
-        return (method_exists($this->CI, $name))?call_user_func_array(array(&$this->CI,$name), $arguments):NULL;
-    }
+class Make_Command extends Command {
 
     /**
      * commands function.
@@ -42,7 +18,7 @@ class Make_Command {
      * @access public
      * @return array
      */
-    public function commands()
+    public static function commands()
     {
         return [
             'name' => 'make', 
@@ -50,11 +26,7 @@ class Make_Command {
             'vars' => [
                 [
                     'name' => '$type', 
-                    'desc' => 'Can be one of the following values: '.$this->_color('migration', 'success').', '.
-                            $this->_color('seeder', 'success').', '.
-                            $this->_color('model', 'success').', '.
-                            $this->_color('controller', 'success').' and '.
-                            $this->_color('view', 'success').'.',
+                    'desc' => 'Can be one of the following values: [success]command[/success], [success]migration[/success], [success]seeder[/success], [success]model[/success], [success]controller[/success] and [success]view[/success].',
                 ],
                 [
                     'name' => '$name', 
@@ -77,6 +49,26 @@ class Make_Command {
     {
         $this->_print('','',"\n");
         $templates_path = APPPATH .'controllers/Creator/templates/';
+
+        // command
+        if($type == 'command')
+        {
+            $command    = strtolower($name);
+            $class_name = ucfirst($command).'_Command';
+            $class_file = $class_name.'.php';
+            $class_data = file_get_contents($templates_path.'command.php');
+            $class_data = str_replace('{class_name}', $class_name, $class_data);
+            $class_data = str_replace('{function_name}', strtolower($class_name), $class_data);
+            if(file_put_contents(APPPATH .'controllers/Creator/commands/'.$class_file, $class_data))
+            {
+                $this->_print($class_file.' Created', 'success');
+            }
+            else
+            {
+                $this->_print($class_file.' Error', 'error');
+            }
+        }
+
         // migration
         if($type == 'migration')
         {
@@ -94,6 +86,7 @@ class Make_Command {
                 $this->_print($class_file.' Error', 'error');
             }
         }
+
         // seeder
         if($type == 'seeder')
         {
@@ -111,6 +104,7 @@ class Make_Command {
                 $this->_print('seeds/'.$class_file.' Error', 'error');
             }
         }
+
         // model
         if($type == 'model')
         {
@@ -146,6 +140,7 @@ class Make_Command {
                 }
             }
         }
+
         // controller
         if($type == 'controller')
         {

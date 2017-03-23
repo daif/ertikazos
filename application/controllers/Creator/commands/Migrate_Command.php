@@ -1,6 +1,5 @@
 <?php
 /**
- * Migrate command class
  *
  * Migrate command class
  *
@@ -9,29 +8,21 @@
  * @category    Libraries
  */
 
-class Migrate_Command {
+class Migrate_Command extends Command {
 
     /**
-     * The CodeIgniter instance 
+     * Class constructor
      *
-     * @var object
+     * @return  void
      */
-    public $CI = NULL;
-
-    /**
-     * Overloading variables
-     */
-    public function __get($name)
+    function __construct()
     {
-        return (isset($this->CI->$name))?$this->CI->$name:NULL;
-    }
-
-    /**
-     * Overloading functions
-     */
-    public function __call($name, $arguments)
-    {
-        return (method_exists($this->CI, $name))?call_user_func_array(array(&$this->CI,$name), $arguments):NULL;
+        parent::__construct();
+        $this->load->library('migration');
+        $this->config->load('migration');
+        // auto-load Migration and Seeder
+        include_once(APPPATH . 'core/ER_Migration.php');
+        include_once(APPPATH . 'core/ER_Seeder.php');
     }
 
     /**
@@ -42,7 +33,7 @@ class Migrate_Command {
      * @access public
      * @return array
      */
-    public function commands()
+    public static function commands()
     {
         return [
             'name' => 'migrate', 

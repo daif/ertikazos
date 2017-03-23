@@ -8,18 +8,25 @@
 
 class Creator extends ER_Controller {
     /**
+     * The commands path
+     *
+     * @var String
+     */
+    public $commands_path = APPPATH.'controllers/Creator/commands/';
+
+    /**
+     * The commands files array
+     *
+     * @var array
+     */
+    public $commands_files = array();
+
+    /**
      * The commands array
      *
      * @var array
      */
     public $commands = array();
-
-    /**
-     * The commands class array
-     *
-     * @var array
-     */
-    public $commands_class = array();
 
     /**
      * Class constructor
@@ -35,13 +42,9 @@ class Creator extends ER_Controller {
             return false;
         }
         $this->autoloadview = FALSE;
-        $this->load->library('migration');
         $this->load->library('directory');
         $this->load->helper('directory');
-        $this->config->load('migration');
-        // auto-load Migration and Seeder
-        include_once(APPPATH . 'core/ER_Migration.php');
-        include_once(APPPATH . 'core/ER_Seeder.php');
+        include_once(APPPATH . 'controllers/Creator/commands/Command.php');
         // call register_commands
         $this->register_commands();
     }
@@ -99,17 +102,15 @@ class Creator extends ER_Controller {
      */
     public function register_commands()
     {
-        $cmd_path  = APPPATH .'controllers/Creator/commands/';
-        $cmd_files = directory_map($cmd_path, 1);
-
-        foreach ($cmd_files as $key => $cmd_file) {
-            if(preg_match('/([a-z]+)_Command/i', $cmd_file, $match)) {
+        $commands_path_files = directory_map($this->commands_path, 1);
+        foreach ($commands_path_files as $key => $command_file) {
+            if(preg_match('/([a-z]+)_Command/i', $command_file, $match)) {
+                // include command file
+                include_once($this->commands_path.$command_file);
                 $cmd_class = $match[0];
                 $cmd_name  = strtolower($match[1]);
-                include_once($cmd_path.$cmd_file);
-                $this->class[$cmd_name]     = new $cmd_class;
-                $this->class[$cmd_name]->CI = &$this;
-                $this->commands[$cmd_name]  = $this->class[$cmd_name]->commands();
+                $this->commands[$cmd_name]  = $cmd_class::commands();
+                $this->commands_files[$cmd_name] = $command_file;
             }
         }
     }
@@ -124,7 +125,10 @@ class Creator extends ER_Controller {
         //if method exists call it
         if (array_key_exists($method, $this->commands))
         {
-            call_user_func_array(array($this->class[$method], $method), array_slice($this->uri->rsegments, 2));
+            $command_class = ucfirst(strtolower($method)).'_Command';
+            $command_object = new $command_class;
+            $command_object->creator = &$this;
+            call_user_func_array(array($command_object, $method), array_slice($this->uri->rsegments, 2));
         }
         else
         {
@@ -155,22 +159,15 @@ class Creator extends ER_Controller {
      */
     public function _color($text, $type = '')
     {
-        if($type == 'error')
+        $search = ['[error]','[/error]','[warning]','[/warning]','[success]','[/success]'];
+        $replace = ["\033[31m","\033[0m","\033[33m","\033[0m","\033[32m","\033[0m"];
+
+        if(in_array('['.$type.']', $search))
         {
-            return "\033[31m".$text."\033[0m";
+            $text = '['.$type.']'.$text.'[/'.$type.']';
         }
-        elseif($type == 'warning')
-        {
-            return "\033[33m".$text."\033[0m";
-        }
-        elseif($type == 'success')
-        {
-            return "\033[32m".$text."\033[0m";
-        }
-        else
-        {
-            return $text;
-        }
+
+        return str_replace($search, $replace, $text);
     }
 
     /**
@@ -180,7 +177,7 @@ class Creator extends ER_Controller {
      */
     public function _prompt($message, $type = '')
     {
-        $this->print($this->_color($message, $type));
+        $this->print($message, $type);
         $stdin      = fopen('php://stdin', 'r');
         $response   = trim(fgetc($stdin));
         return($response);
