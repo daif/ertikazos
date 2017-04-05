@@ -10,7 +10,7 @@
  */
 
 class {class_name} extends ER_Model {
-/**
+    /**
      * The table name for the model.
      *
      * @var string

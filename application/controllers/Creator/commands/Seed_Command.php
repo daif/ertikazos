@@ -17,6 +17,7 @@ class Seed_Command extends Command {
      */
     function __construct()
     {
+        parent::__construct();
         $this->load->library('migration');
         $this->load->library('directory');
         $this->load->helper('directory');
@@ -39,6 +40,12 @@ class Seed_Command extends Command {
         return [
             'name' => 'seed', 
             'desc' => 'Seed database with last seeder file.', 
+            'vars' => [
+                [
+                    'name' => '$version', 
+                    'desc' => 'Seed this $version number.',
+                ],
+            ],
         ];
     }
 

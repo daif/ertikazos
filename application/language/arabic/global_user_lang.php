@@ -1,6 +1,6 @@
 <?php
 /**
- * AddressBook language file
+ * Global User language file
  */
 defined('BASEPATH') OR exit('No direct script access allowed');
 

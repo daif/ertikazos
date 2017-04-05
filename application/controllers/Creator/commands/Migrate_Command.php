@@ -38,6 +38,12 @@ class Migrate_Command extends Command {
         return [
             'name' => 'migrate', 
             'desc' => 'Migrate the database to last migration version.', 
+            'vars' => [
+                [
+                    'name' => '$version', 
+                    'desc' => 'Migrate this $version number.',
+                ],
+            ],
         ];
     }
 
