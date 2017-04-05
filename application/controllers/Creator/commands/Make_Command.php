@@ -216,7 +216,6 @@ class Make_Command extends Command {
             {
                 $class_data = file_get_contents($templates_path.'routes.php');
                 $class_data = str_replace('{class_name}', $class_name, $class_data);
-                $class_data = str_replace('{model_name}', strtolower($class_name), $class_data);
                 $class_data = str_replace('{app_name}', trim($app_name,'/'), $class_data);
                 if(file_put_contents(APPPATH.'controllers/'.$app_name.'routes.php', $class_data))
                 {
@@ -278,6 +277,7 @@ class Make_Command extends Command {
             $class_file = 'controllers/'.$app_name.ucfirst($table_name).'.php';
             $class_data = file_get_contents($templates_path.'controller.php');
             $class_data = str_replace('{class_name}', $class_name, $class_data);
+            $class_data = str_replace('{model_name}', strtolower($class_name), $class_data);
             $class_data = str_replace('{app_name}', trim($app_name,'/'), $class_data);
 
             // make sure the file is not existed

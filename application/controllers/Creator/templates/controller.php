@@ -116,8 +116,8 @@ class {class_name} extends ER_Controller {
      */
     public function postEdit($id)
     {
-        $input = $this->input->post(array_keys($this->model->forms['edit']));
-        $this->form_validation->set_rules($this->model->rules('edit'));
+        $input = $this->input->post(array_keys($this->{model_name}->forms['edit']));
+        $this->form_validation->set_rules($this->{model_name}->rules('edit'));
 
         if ($this->form_validation->run() === TRUE)
         {
