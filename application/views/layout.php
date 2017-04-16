@@ -156,9 +156,9 @@
                         <ul class="dropdown-menu extended pro-menu fadeInUp animated" tabindex="5003" style="overflow: hidden; outline: none;">
                             <li><a href="<?php echo base_url() ?>User/Account"><i class="fa fa-briefcase"></i> <?php echo lang('profile')?></a></li>
                             <?php if($this->session->userdata('lang') == 'arabic'){ ?>
-                                <li><a href="<?php echo base_url() ?>User/Account/lang/english"><i class="fa fa-language fa-fw"></i> English</a></li>
+                                <li><a href="<?php echo base_url() ?>Home/lang/english"><i class="fa fa-language fa-fw"></i> English</a></li>
                             <?php } else { ?>
-                                <li><a href="<?php echo base_url() ?>User/Account/lang/arabic"><i class="fa fa-language fa-fw"></i> عربي</a></li>
+                                <li><a href="<?php echo base_url() ?>Home/lang/arabic"><i class="fa fa-language fa-fw"></i> عربي</a></li>
                             <?php } ?>
                             <li><a href="<?php echo base_url(); ?>Auth/Login/logout"><i class="fa fa-sign-out"></i> <?php echo lang('logout')?></a></li>
                         </ul>

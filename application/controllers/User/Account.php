@@ -31,25 +31,6 @@ class Account extends ER_Controller {
 
     /**
      *
-     * Lang Page for this controller.
-     *
-     */
-    public function getLang($lang)
-    {
-        $this->load->library('user_agent');
-        if($lang == 'arabic' || $lang == 'english') {
-            $this->session->set_userdata('lang', $lang);
-            set_message('language_switched','success');
-        }
-        if(base_url() == substr($this->agent->referrer(), 0, strlen(base_url()))) {
-            redirect($this->agent->referrer());
-        } else {
-            redirect('/User/Dashboard');
-        }
-    }
-
-    /**
-     *
      * getUpdate for this controller.
      *
      */
