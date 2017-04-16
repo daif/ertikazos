@@ -54,6 +54,7 @@ class Migrate_Command extends Command {
      */
     public function migrate($target_version = FALSE)
     {
+        $target_version  = $this->version_by_name($target_version);
         $current_version = $this->db->select('version')->get(config_item('migration_table'))->row();
         if($target_version !== FALSE)
         {
@@ -87,6 +88,27 @@ class Migrate_Command extends Command {
         }
     }
 
+    /**
+     *
+     * Get target version by name.
+     *
+     */
+    public function version_by_name($target_version)
+    {
+        if(!preg_match('/[0-9]{14}/', $target_version) && $target_version !== FALSE)
+        {
+            $version = glob(config_item('migration_path').'*_'.$target_version.'.php');
+            if(isset($version[0]))
+            {
+                $version = explode('_', basename($version[0]));
+                if(isset($version[0]))
+                {
+                    return $version[0];
+                }
+            }
+        }
+        return $target_version;
+    }
 }
 
 ?>

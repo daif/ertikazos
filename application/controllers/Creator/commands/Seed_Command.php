@@ -55,7 +55,8 @@ class Seed_Command extends Command {
      *
      */
     public function seed($target_version = FALSE)
-    {   
+    {
+        $target_version  = $this->version_by_name($target_version);
         if(!$this->db->field_exists('seed_version', config_item('migration_table')))
         {
             $fields = array('seed_version' =>  array('type' => 'BIGINT', 'constraint' => 20));
@@ -103,6 +104,27 @@ class Seed_Command extends Command {
         }
     }
 
+    /**
+     *
+     *Get target version by name.
+     *
+     */
+    public function version_by_name($target_version)
+    {
+        if(!preg_match('/[0-9]{14}/', $target_version) && $target_version !== FALSE)
+        {
+            $version = glob(config_item('migration_path').'seeds/*_'.$target_version.'.php');
+            if(isset($version[0]))
+            {
+                $version = explode('_', basename($version[0]));
+                if(isset($version[0]))
+                {
+                    return $version[0];
+                }
+            }
+        }
+        return $target_version;
+    }
 }
 
 ?>
