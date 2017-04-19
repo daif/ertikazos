@@ -13,7 +13,7 @@ class ER_Controller extends CI_Controller{
     /**
      * The current version of ErtikazOS
      */
-    const ER_VERSION = '1.0.0';
+    const ER_VERSION = '1.2.0';
 
     /**
     * The variables array
@@ -29,11 +29,6 @@ class ER_Controller extends CI_Controller{
     * The default view name.
     */
     public $viewname = '';
-
-    /**
-    * A list of models to be auto loaded
-    */
-    public $models = array();
 
     /**
     * if this value is true we will auto load view after call method
@@ -72,21 +67,6 @@ class ER_Controller extends CI_Controller{
      */
     function __construct(){
         parent::__construct();
-        // load helpers
-        $this->load->helper('language');
-        $this->load->helper('url');
-        $this->load->helper('form');
-        $this->load->helper('maker');
-        $this->load->helper('common');
-
-        // load libraries
-        $this->load->library('encryption');
-        $this->load->library('form_validation');
-
-        // load models
-        $this->load->model('Admin/App_model', 'app');
-        $this->load->model('Admin/User_model', 'user');
-        $this->load->model('Admin/Setting_model', 'setting');
 
         // load session
         $this->load->driver('session');
@@ -136,6 +116,7 @@ class ER_Controller extends CI_Controller{
                 redirect('/Auth/Login');
             }
         }
+
         if(isset($app))
         {
             $this->watchlog = watchdog('ACCESS', $app->app_id, $_REQUEST);

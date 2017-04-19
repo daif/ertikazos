@@ -1,6 +1,5 @@
 <?php
 /**
- * Make command class
  *
  * Make command class
  *
@@ -9,29 +8,17 @@
  * @category    Libraries
  */
 
-class Make_Command {
+class Make_Command extends Command {
 
     /**
-     * The CodeIgniter instance 
+     * Class constructor
      *
-     * @var object
+     * @return  void
      */
-    public $CI = NULL;
-
-    /**
-     * Overloading variables
-     */
-    public function __get($name)
+    function __construct()
     {
-        return (isset($this->CI->$name))?$this->CI->$name:NULL;
-    }
-
-    /**
-     * Overloading functions
-     */
-    public function __call($name, $arguments)
-    {
-        return (method_exists($this->CI, $name))?call_user_func_array(array(&$this->CI,$name), $arguments):NULL;
+        parent::__construct();
+        $this->config->load('migration');
     }
 
     /**
@@ -42,7 +29,7 @@ class Make_Command {
      * @access public
      * @return array
      */
-    public function commands()
+    public static function commands()
     {
         return [
             'name' => 'make', 
@@ -50,11 +37,7 @@ class Make_Command {
             'vars' => [
                 [
                     'name' => '$type', 
-                    'desc' => 'Can be one of the following values: '.$this->_color('migration', 'success').', '.
-                            $this->_color('seeder', 'success').', '.
-                            $this->_color('model', 'success').', '.
-                            $this->_color('controller', 'success').' and '.
-                            $this->_color('view', 'success').'.',
+                    'desc' => 'Can be one of the following values: [success]command[/success], [success]migration[/success], [success]seeder[/success], [success]model[/success], [success]controller[/success] and [success]view[/success].',
                 ],
                 [
                     'name' => '$name', 
@@ -73,10 +56,53 @@ class Make_Command {
      * make migration or seeder or model file.
      *
      */
-    public function make($type, $name, $app='')
+    public function make($type='', $name='', $app='')
     {
         $this->_print('','',"\n");
         $templates_path = APPPATH .'controllers/Creator/templates/';
+
+        // make sure the type is one of the options
+        $type_list = ['command', 'migration', 'seeder', 'model', 'controller', 'view'];
+        if(!in_array(strtolower($type), $type_list))
+        {
+            $this->_print('Type must be one of the following values: '.implode(', ', $type_list).'.', 'error', "\n\n");
+            return FALSE;
+        }
+
+        // the minimum length is 2
+        $name = trim($name);
+        if(strlen($name)<=1)
+        {
+            $this->_print('The minimum length for $name is two chars.', 'error', "\n\n");
+            return FALSE;
+        }
+
+        // command
+        if($type == 'command')
+        {
+            $command    = strtolower($name);
+            $class_name = ucfirst($command).'_Command';
+            $class_file = $class_name.'.php';
+            $class_data = file_get_contents($templates_path.'command.php');
+            $class_data = str_replace('{class_name}', $class_name, $class_data);
+            $class_data = str_replace('{function_name}', strtolower($class_name), $class_data);
+
+            // make sure the file is not existed
+            if(file_exists(APPPATH .'controllers/Creator/commands/'.$class_file))
+            {
+                $this->_print('Command file is already existed.', 'error', "\n\n");
+                return FALSE;
+            }
+            if(file_put_contents(APPPATH .'controllers/Creator/commands/'.$class_file, $class_data))
+            {
+                $this->_print($class_file.' Created', 'success');
+            }
+            else
+            {
+                $this->_print($class_file.' Error', 'error');
+            }
+        }
+
         // migration
         if($type == 'migration')
         {
@@ -85,6 +111,13 @@ class Make_Command {
             $class_file = date('YmdHis').'_'.$table_name.'.php';
             $class_data = file_get_contents($templates_path.'migration.php');
             $class_data = str_replace('{class_name}', $class_name, $class_data);
+
+            // make sure the file is not existed
+            if(file_exists(config_item('migration_path').$class_file))
+            {
+                $this->_print('Migration file is already existed.', 'error', "\n\n");
+                return FALSE;
+            }
             if(file_put_contents(config_item('migration_path').$class_file, $class_data))
             {
                 $this->_print($class_file.' Created', 'success');
@@ -94,6 +127,7 @@ class Make_Command {
                 $this->_print($class_file.' Error', 'error');
             }
         }
+
         // seeder
         if($type == 'seeder')
         {
@@ -102,6 +136,13 @@ class Make_Command {
             $class_file = date('YmdHis').'_'.$table_name.'.php';
             $class_data = file_get_contents($templates_path.'seeder.php');
             $class_data = str_replace('{class_name}', $class_name, $class_data);
+
+            // make sure the file is not existed
+            if(file_exists(config_item('migration_path').'seeds/'.$class_file))
+            {
+                $this->_print('Seeder file is already existed.', 'error', "\n\n");
+                return FALSE;
+            }
             if(file_put_contents(config_item('migration_path').'seeds/'.$class_file, $class_data))
             {
                 $this->_print('seeds/'.$class_file.' Created', 'success');
@@ -111,6 +152,7 @@ class Make_Command {
                 $this->_print('seeds/'.$class_file.' Error', 'error');
             }
         }
+
         // model
         if($type == 'model')
         {
@@ -134,18 +176,22 @@ class Make_Command {
                 }
             }
 
-            if(!file_exists(APPPATH.$class_file))
+            // make sure the file is not existed
+            if(file_exists(APPPATH.$class_file))
             {
-                if(file_put_contents(APPPATH.$class_file, $class_data))
-                {
-                    $this->_print($class_file.' Created', 'success');
-                }
-                else
-                {
-                    $this->_print($class_file.' Error', 'error');
-                }
+                $this->_print('Model file is already existed.', 'error', "\n\n");
+                return FALSE;
+            }
+            if(file_put_contents(APPPATH.$class_file, $class_data))
+            {
+                $this->_print($class_file.' Created', 'success');
+            }
+            else
+            {
+                $this->_print($class_file.' Error', 'error');
             }
         }
+
         // controller
         if($type == 'controller')
         {
@@ -161,8 +207,8 @@ class Make_Command {
                 }
                 else
                 {
-                    $this->_print('controllers/'.$app_name.' Error', 'error');
-                    return;
+                    $this->_print('controllers/'.$app_name.' Error', 'error', "\n\n");
+                    return FALSE;
                 }
             }
 
@@ -177,7 +223,8 @@ class Make_Command {
                 }
                 else
                 {
-                    $this->_print('controllers/'.$app_name.'routes.php'.' Error', 'error');
+                    $this->_print('controllers/'.$app_name.'routes.php'.' Error', 'error', "\n\n");
+                    return FALSE;
                 }
             }
 
@@ -193,7 +240,8 @@ class Make_Command {
                     }
                     else
                     {
-                        $this->_print(str_replace(APPPATH, '',$lang_dir).'/'.strtolower(trim($app_name,'/')).'_lang.php'.' Error', 'error');
+                        $this->_print(str_replace(APPPATH, '',$lang_dir).'/'.strtolower(trim($app_name,'/')).'_lang.php'.' Error', 'error', "\n\n");
+                        return FALSE;
                     }
                 }
 
@@ -208,7 +256,8 @@ class Make_Command {
                     }
                     else
                     {
-                        $this->_print(str_replace(APPPATH, '',$lang_dir).'/global_'.strtolower(trim($app_name,'/')).'_lang.php'.' Error', 'error');
+                        $this->_print(str_replace(APPPATH, '',$lang_dir).'/global_'.strtolower(trim($app_name,'/')).'_lang.php'.' Error', 'error', "\n\n");
+                        return FALSE;
                     }
                 }
 
@@ -220,24 +269,30 @@ class Make_Command {
                 }
                 else
                 {
-                    $this->_print(str_replace(APPPATH, '',$lang_dir).'/global_'.strtolower(trim($app_name,'/')).'_lang.php'.' Error adding language line', 'error');
+                    $this->_print(str_replace(APPPATH, '',$lang_dir).'/global_'.strtolower(trim($app_name,'/')).'_lang.php'.' Error adding language line', 'error', "\n\n");
+                    return FALSE;
                 }
             }
 
             $class_file = 'controllers/'.$app_name.ucfirst($table_name).'.php';
             $class_data = file_get_contents($templates_path.'controller.php');
             $class_data = str_replace('{class_name}', $class_name, $class_data);
+            $class_data = str_replace('{model_name}', strtolower($class_name), $class_data);
             $class_data = str_replace('{app_name}', trim($app_name,'/'), $class_data);
-            if(!file_exists(APPPATH.$class_file))
+
+            // make sure the file is not existed
+            if(file_exists(APPPATH.$class_file))
             {
-                if(file_put_contents(APPPATH.$class_file, $class_data))
-                {
-                    $this->_print($class_file.' Created', 'success');
-                }
-                else
-                {
-                    $this->_print($class_file.' Error', 'error');
-                }
+                $this->_print('Controller file is already existed.', 'error', "\n\n");
+                return FALSE;
+            }
+            if(file_put_contents(APPPATH.$class_file, $class_data))
+            {
+                $this->_print($class_file.' Created', 'success');
+            }
+            else
+            {
+                $this->_print($class_file.' Error', 'error');
             }
         }
 
@@ -256,8 +311,8 @@ class Make_Command {
                 }
                 else
                 {
-                    $this->_print('views/'.$app_name.' Error', 'error');
-                    return;
+                    $this->_print('views/'.$app_name.' Error', 'error', "\n\n");
+                    return FALSE;
                 }
             }
 
@@ -269,7 +324,8 @@ class Make_Command {
                 }
                 else
                 {
-                    $this->_print('views/'.$app_name.'layout.php Error', 'error');
+                    $this->_print('views/'.$app_name.'layout.php Error', 'error', "\n\n");
+                    return FALSE;
                 }
             }
 
@@ -281,30 +337,34 @@ class Make_Command {
                 }
                 else
                 {
-                    $this->_print('views/'.$app_name.$class_name.' Error', 'error');
-                    return;
+                    $this->_print('views/'.$app_name.$class_name.' Error', 'error', "\n\n");
+                    return FALSE;
                 }
             }
 
             foreach ($view_files as $key => $view_file) {
                 $class_file = 'views/'.$app_name.$class_name.'/'.str_replace($templates_path.'view_', '', $view_file);
-                if(!file_exists(APPPATH.$class_file))
+
+                // make sure the file is not existed
+                if(file_exists(APPPATH.$class_file))
                 {
-                    $class_data = file_get_contents($view_file);
-                    $class_data = str_ireplace('{class_name}', $class_name, $class_data);
-                    $class_data = str_ireplace('{app_name}', trim($app_name,'/'), $class_data);
+                    $this->_print('View file '.$class_file.' is already existed.', 'warning');
+                    continue;
+                }
+                $class_data = file_get_contents($view_file);
+                $class_data = str_ireplace('{class_name}', $class_name, $class_data);
+                $class_data = str_ireplace('{app_name}', trim($app_name,'/'), $class_data);
 
-                    $class_data = str_ireplace('{Class_name}', ucfirst($class_name), $class_data);
-                    $class_data = str_ireplace('{App_name}', ucfirst(trim($app_name,'/')), $class_data);
+                $class_data = str_ireplace('{Class_name}', ucfirst($class_name), $class_data);
+                $class_data = str_ireplace('{App_name}', ucfirst(trim($app_name,'/')), $class_data);
 
-                    if(file_put_contents(APPPATH.$class_file, $class_data))
-                    {
-                        $this->_print($class_file . ' Created', 'success');
-                    }
-                    else
-                    {
-                        $this->_print($class_file . ' Error', 'error');
-                    }
+                if(file_put_contents(APPPATH.$class_file, $class_data))
+                {
+                    $this->_print($class_file . ' Created', 'success');
+                }
+                else
+                {
+                    $this->_print($class_file . ' Error', 'error');
                 }
             }
         }

@@ -19,6 +19,10 @@
                     <?php echo make_form_open() ?>
                     <?php foreach ($setting->subSettings() as $input) { ?>
                         <div class="form-group">
+                            <?php echo make_label(array(
+                                'field' => $input->name,
+                                'label' => $input->name,
+                            )) ?>
                             <?php echo make_input(array(
                                 'field' => $input->name,
                                 'label' => $input->name,

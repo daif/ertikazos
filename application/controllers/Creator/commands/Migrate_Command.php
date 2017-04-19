@@ -1,6 +1,5 @@
 <?php
 /**
- * Migrate command class
  *
  * Migrate command class
  *
@@ -9,29 +8,21 @@
  * @category    Libraries
  */
 
-class Migrate_Command {
+class Migrate_Command extends Command {
 
     /**
-     * The CodeIgniter instance 
+     * Class constructor
      *
-     * @var object
+     * @return  void
      */
-    public $CI = NULL;
-
-    /**
-     * Overloading variables
-     */
-    public function __get($name)
+    function __construct()
     {
-        return (isset($this->CI->$name))?$this->CI->$name:NULL;
-    }
-
-    /**
-     * Overloading functions
-     */
-    public function __call($name, $arguments)
-    {
-        return (method_exists($this->CI, $name))?call_user_func_array(array(&$this->CI,$name), $arguments):NULL;
+        parent::__construct();
+        $this->load->library('migration');
+        $this->config->load('migration');
+        // auto-load Migration and Seeder
+        include_once(APPPATH . 'core/ER_Migration.php');
+        include_once(APPPATH . 'core/ER_Seeder.php');
     }
 
     /**
@@ -42,11 +33,17 @@ class Migrate_Command {
      * @access public
      * @return array
      */
-    public function commands()
+    public static function commands()
     {
         return [
             'name' => 'migrate', 
             'desc' => 'Migrate the database to last migration version.', 
+            'vars' => [
+                [
+                    'name' => '$version', 
+                    'desc' => 'Migrate this $version number.',
+                ],
+            ],
         ];
     }
 
@@ -57,6 +54,7 @@ class Migrate_Command {
      */
     public function migrate($target_version = FALSE)
     {
+        $target_version  = $this->version_by_name($target_version);
         $current_version = $this->db->select('version')->get(config_item('migration_table'))->row();
         if($target_version !== FALSE)
         {
@@ -90,6 +88,27 @@ class Migrate_Command {
         }
     }
 
+    /**
+     *
+     * Get target version by name.
+     *
+     */
+    public function version_by_name($target_version)
+    {
+        if(!preg_match('/[0-9]{14}/', $target_version) && $target_version !== FALSE)
+        {
+            $version = glob(config_item('migration_path').'*_'.$target_version.'.php');
+            if(isset($version[0]))
+            {
+                $version = explode('_', basename($version[0]));
+                if(isset($version[0]))
+                {
+                    return $version[0];
+                }
+            }
+        }
+        return $target_version;
+    }
 }
 
 ?>

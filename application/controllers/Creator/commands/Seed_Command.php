@@ -1,6 +1,5 @@
 <?php
 /**
- * Seed command class
  *
  * Seed command class
  *
@@ -9,29 +8,23 @@
  * @category    Libraries
  */
 
-class Seed_Command {
+class Seed_Command extends Command {
 
     /**
-     * The CodeIgniter instance 
+     * Class constructor
      *
-     * @var object
+     * @return  void
      */
-    public $CI = NULL;
-
-    /**
-     * Overloading variables
-     */
-    public function __get($name)
+    function __construct()
     {
-        return (isset($this->CI->$name))?$this->CI->$name:NULL;
-    }
-
-    /**
-     * Overloading functions
-     */
-    public function __call($name, $arguments)
-    {
-        return (method_exists($this->CI, $name))?call_user_func_array(array(&$this->CI,$name), $arguments):NULL;
+        parent::__construct();
+        $this->load->library('migration');
+        $this->load->library('directory');
+        $this->load->helper('directory');
+        $this->config->load('migration');
+        // auto-load Migration and Seeder
+        include_once(APPPATH . 'core/ER_Migration.php');
+        include_once(APPPATH . 'core/ER_Seeder.php');
     }
 
     /**
@@ -42,11 +35,17 @@ class Seed_Command {
      * @access public
      * @return array
      */
-    public function commands()
+    public static function commands()
     {
         return [
             'name' => 'seed', 
             'desc' => 'Seed database with last seeder file.', 
+            'vars' => [
+                [
+                    'name' => '$version', 
+                    'desc' => 'Seed this $version number.',
+                ],
+            ],
         ];
     }
 
@@ -56,7 +55,8 @@ class Seed_Command {
      *
      */
     public function seed($target_version = FALSE)
-    {   
+    {
+        $target_version  = $this->version_by_name($target_version);
         if(!$this->db->field_exists('seed_version', config_item('migration_table')))
         {
             $fields = array('seed_version' =>  array('type' => 'BIGINT', 'constraint' => 20));
@@ -104,6 +104,27 @@ class Seed_Command {
         }
     }
 
+    /**
+     *
+     *Get target version by name.
+     *
+     */
+    public function version_by_name($target_version)
+    {
+        if(!preg_match('/[0-9]{14}/', $target_version) && $target_version !== FALSE)
+        {
+            $version = glob(config_item('migration_path').'seeds/*_'.$target_version.'.php');
+            if(isset($version[0]))
+            {
+                $version = explode('_', basename($version[0]));
+                if(isset($version[0]))
+                {
+                    return $version[0];
+                }
+            }
+        }
+        return $target_version;
+    }
 }
 
 ?>

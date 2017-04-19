@@ -15,7 +15,7 @@ class {class_name} extends ER_Controller {
     function __construct()
     {
         parent::__construct();
-        $this->load->model('{app_name}/{class_name}_model', 'model');
+        $this->load->model('{app_name}/{class_name}_model', '{model_name}');
     }
 
     /**
@@ -38,9 +38,9 @@ class {class_name} extends ER_Controller {
         $this->create_button = true;
         $limit  = 10;
         $offset = $this->input->get('page');
-        $count  = $this->model->count();
+        $count  = $this->{model_name}->count();
         $this->data['paging'] = make_paging($count, $limit);
-        $this->data['rows_list'] = $this->model->rows();
+        $this->data['rows_list'] = $this->{model_name}->rows();
     }
 
     /**
@@ -50,7 +50,7 @@ class {class_name} extends ER_Controller {
      */
     public function getShow($id)
     {
-        $this->data['row'] = $this->model->find($id);
+        $this->data['row'] = $this->{model_name}->find($id);
         if(!is_object($this->data['row']))
         {
             set_message('row_is_not_found', 'error');
@@ -74,16 +74,16 @@ class {class_name} extends ER_Controller {
      */
     public function postCreate()
     {
-        $input = $this->input->post(array_keys($this->model->forms['create']));
-        $this->form_validation->set_rules($this->model->rules('create'));
+        $input = $this->input->post(array_keys($this->{model_name}->forms['create']));
+        $this->form_validation->set_rules($this->{model_name}->rules('create'));
 
         if ($this->form_validation->run() === TRUE)
         {
-            $model = new $this->model;
+            ${model_name} = new $this->{model_name};
             foreach ($input as $key => $value) {
-                $model->$key = $value;
+                ${model_name}->$key = $value;
             }
-            $model = $model->insert();
+            ${model_name} = ${model_name}->insert();
             set_message('row_has_been_created', 'success');
             redirect('/{app_name}/{class_name}/list');
         }
@@ -101,7 +101,7 @@ class {class_name} extends ER_Controller {
      */
     public function getEdit($id)
     {
-        $this->data['row'] = $this->model->find($id);
+        $this->data['row'] = $this->{model_name}->find($id);
         if(!is_object($this->data['row']))
         {
             set_message('row_is_not_found', 'error');
@@ -116,18 +116,18 @@ class {class_name} extends ER_Controller {
      */
     public function postEdit($id)
     {
-        $input = $this->input->post(array_keys($this->model->forms['edit']));
-        $this->form_validation->set_rules($this->model->rules('edit'));
+        $input = $this->input->post(array_keys($this->{model_name}->forms['edit']));
+        $this->form_validation->set_rules($this->{model_name}->rules('edit'));
 
         if ($this->form_validation->run() === TRUE)
         {
-            $model = $this->model->find($id);
-            if(is_object($model))
+            ${model_name} = $this->{model_name}->find($id);
+            if(is_object(${model_name}))
             {
                 foreach ($input as $key => $value) {
-                    $model->$key = $value;
+                    ${model_name}->$key = $value;
                 }
-                $model->update();
+                ${model_name}->update();
                 set_message('row_has_been_updated', 'success');
             }
             else
@@ -150,11 +150,11 @@ class {class_name} extends ER_Controller {
      */
     public function postDelete()
     {
-        $input = $this->input->post(array_keys($this->model->forms['delete']));
-        $model = $this->model->user_find($input[$this->model->primaryKey]);
-        if(is_object($model))
+        $input = $this->input->post(array_keys($this->{model_name}->forms['delete']));
+        ${model_name} = $this->{model_name}->user_find($input[$this->{model_name}->primaryKey]);
+        if(is_object(${model_name}))
         {
-            $model->delete();
+            ${model_name}->delete();
             set_message('row_has_been_deleted', 'success');
         }
         else

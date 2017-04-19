@@ -271,7 +271,7 @@ class Migration_Ertikazos extends ER_Migration {
             'field' =>  array(
                 'id' => array(
                     'type' => 'VARCHAR',
-                    'constraint' => 40,
+                    'constraint' => 128,
                     'key' => TRUE,
                 ),
                 'timestamp' => array(

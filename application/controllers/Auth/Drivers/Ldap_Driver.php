@@ -33,6 +33,8 @@ class Ldap_Driver implements Auth {
             list($username, ) = explode('@', $username, 2);
         }
         $conn       = ldap_connect(get_setting('ldap/host'), get_setting('ldap/port'));
+        // always set protocol version to 3 
+        @ldap_set_option($conn, LDAP_OPT_PROTOCOL_VERSION, 3) ;
         $bind       = ldap_bind($conn, $username.'@'.get_setting('ldap/domain'), $password);
         
         if($bind) {
