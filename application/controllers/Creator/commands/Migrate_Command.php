@@ -22,7 +22,12 @@ class Migrate_Command extends Command {
         $this->config->load('migration');
         // auto-load Migration and Seeder
         include_once(APPPATH . 'core/ER_Migration.php');
-        include_once(APPPATH . 'core/ER_Seeder.php');
+        // auto create file_path to track files
+        if(!$this->db->field_exists('file_path', config_item('migration_table')))
+        {
+            $fields = array('file_path' =>  array('type' => 'varchar', 'constraint' => 64));
+            $this->dbforge->add_column(config_item('migration_table'), $fields);
+        }
     }
 
     /**
@@ -37,11 +42,15 @@ class Migrate_Command extends Command {
     {
         return [
             'name' => 'migrate', 
-            'desc' => 'Migrate the database to last migration version.', 
+            'desc' => 'Migrate all file to database or passed $version or $name.', 
             'vars' => [
                 [
-                    'name' => '$version', 
-                    'desc' => 'Migrate this $version number.',
+                    'name' => '$version or $name', 
+                    'desc' => 'Migrating file by its [success]$version[/success] or [success]$name[/success].',
+                ],
+                [
+                    'name' => '$direction', 
+                    'desc' => 'Migrating direction [success]up[/success] or [success]down[/success].',
                 ],
             ],
         ];
@@ -52,62 +61,75 @@ class Migrate_Command extends Command {
      * migrate command.
      *
      */
-    public function migrate($target_version = FALSE)
+    public function migrate($target_version = FALSE, $direction = 'up')
     {
-        $target_version  = $this->version_by_name($target_version);
-        $current_version = $this->db->select('version')->get(config_item('migration_table'))->row();
-        if($target_version !== FALSE)
+        $this->_print('', '');
+        if($target_version === FALSE)
         {
-            if($target_version > $current_version->version)
+            $migration_path = '*_*.php';
+        }
+        elseif(preg_match('/[0-9]{14}/', $target_version))
+        {
+            $migration_path = ''.$target_version.'_*.php';
+        } else
+        {
+            $migration_path = '*_'.strtolower($target_version).'.php';
+        }
+
+        // find migration files 
+        foreach (glob(config_item('migration_path').$migration_path) as $key => $migration_file)
+        {
+            list($timestamp, $filename) = explode('_', basename($migration_file));
+            // search for the migration file in database
+            $migration_row = $this->db->select('file_path')->get_where(config_item('migration_table'), array('file_path' => basename($migration_file)))->row();
+
+            require_once(config_item('migration_path').''.basename($migration_file));
+            $migration = 'Migration_'.ucfirst(explode('.', $filename)[0]);
+
+            if(!class_exists($migration))
             {
-                if ($this->migration->version($target_version) === FALSE)
+                $this->_print("migration class '$migration' is not found", 'error');
+                continue;
+            }
+            // new migration instance
+            $migration = new $migration;
+            if(strtolower($direction) == 'down')
+            {
+                if($migration_row)
                 {
-                    show_error($this->migration->error_string());
+                    $migration->down();
+
+                    $this->db->delete(config_item('migration_table'), array('file_path' => basename($migration_file)));
+                    $this->_print(basename($migration_file).' Un-Migrated.', 'success');
                 }
                 else
                 {
-                    $this->_print("Migrate has been executed", 'success');
+                    // migration file is not migrated yet
+                    $this->_print(basename($migration_file).' is not migrated yet.', 'success');
+                    continue;
                 }
             }
             else
             {
-                $this->_print("Nothing to migrate", 'error');
-                return;
-            }
-        }
-        else
-        {
-            if ($this->migration->current() === FALSE)
-            {
-                show_error($this->migration->error_string());
-            }
-            else
-            {
-                $this->_print("Migrate has been executed", 'success');
-            }
-        }
-    }
-
-    /**
-     *
-     * Get target version by name.
-     *
-     */
-    public function version_by_name($target_version)
-    {
-        if(!preg_match('/[0-9]{14}/', $target_version) && $target_version !== FALSE)
-        {
-            $version = glob(config_item('migration_path').'*_'.$target_version.'.php');
-            if(isset($version[0]))
-            {
-                $version = explode('_', basename($version[0]));
-                if(isset($version[0]))
+                if($migration_row)
                 {
-                    return $version[0];
+                    // migrated file is already migrated
+                    $this->_print(basename($migration_file).' is already migrated.', 'warning');
+                    continue;
+                }
+                else
+                {
+                    $migration->up();
+                    $this->db->insert(config_item('migration_table'), array('file_path' => basename($migration_file)));
+                    $this->_print(basename($migration_file).' Migrated.', 'success');
                 }
             }
         }
-        return $target_version;
+        if(!isset($migration_file))
+        {
+            $this->_print("Migrating target '$target_version' is not found.", 'error');
+        }
+        $this->_print('', '');
     }
 }
 

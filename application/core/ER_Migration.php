@@ -26,6 +26,31 @@ class ER_Migration extends CI_Migration{
         parent::__construct();
     }
 
+    /**
+     * Retrieves current schema version, override CI_Migration class
+     *
+     * @return  string  Current migration version
+     */
+    protected function _get_version()
+    {
+        $row = $this->db->select('version')->get($this->_migration_table)->row();
+        return $row ? $row->version : '0';
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Stores the current schema version, override CI_Migration class
+     *
+     * @param   string  $migration  Migration reached
+     * @return  void
+     */
+    protected function _update_version($migration)
+    {
+        $this->db->update($this->_migration_table, array(
+            'version' => $migration
+        ));
+    }
 
     /**
      * migrating the database

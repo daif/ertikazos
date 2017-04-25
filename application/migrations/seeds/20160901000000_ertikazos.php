@@ -2,13 +2,26 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Ertikazos_Seeder extends ER_Seeder {
-    public function up()
+    /**
+     * Class constructor
+     *
+     * @return  void
+     */
+    function __construct()
     {
         get_instance()->load->model('Admin/App_model');
         get_instance()->load->model('Admin/User_model');
         get_instance()->load->model('Admin/Group_model');
         get_instance()->load->model('User/Notify_model');
+    }
 
+    /**
+     * prepare the seeds array
+     *
+     * @return  void
+     */
+    public function setup()
+    {
         $this->seeds['er_apps'] = array(
             // User application
             array(
@@ -377,21 +390,29 @@ class Ertikazos_Seeder extends ER_Seeder {
                 'user_status'   => User_model::STATUS_ACTIVE
             ),
         );
+    }
 
+    public function up()
+    {
+        // prepare seeds array
+        $this->setup();
         // seeding the seeds
         $this->seeding();
-
     }
 
     public function down()
     {
-        get_instance()->db->delete('er_settings');
-        get_instance()->db->delete('er_apps');
-        get_instance()->db->delete('er_groups');
-        get_instance()->db->delete('er_users');
-        get_instance()->db->delete('er_users_ses');
-        get_instance()->db->delete('er_users_rels');
-        get_instance()->db->delete('er_permissions');
+        // prepare seeds array
+        $this->setup();
+
+        // delete the seeded data
+        foreach ($this->seeds as $table => $rows)
+        {
+            foreach ($rows as $key => $where)
+            {
+                get_instance()->db->delete($table, $where);
+            }            
+        }
     }
 }
 ?>

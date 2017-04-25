@@ -12,8 +12,14 @@ class Migration_Ertikazos extends ER_Migration {
         parent::__construct();
     }
 
-    public function up()
+    /**
+     * prepare the migration array
+     *
+     * @return  void
+     */
+    public function setup()
     {
+        // migration array
         // er_settings table
         $this->migration['er_settings'] = array(
             'name'  =>  'er_settings',
@@ -204,7 +210,7 @@ class Migration_Ertikazos extends ER_Migration {
                 //table suffix
                 'user_create_by' => array(
                     'type' => 'INT',
-		    'constraint' => 11,
+                    'constraint' => 11,
                     'default' => '0'
                 ),
                 'user_update_by' => array(
@@ -426,22 +432,30 @@ class Migration_Ertikazos extends ER_Migration {
             ),
             'attributes' => array('ENGINE' => 'MyISAM'),
         );
-
-        // do the migration
-        $this->migrating();
-
     }
 
+    // migrating
+    public function up()
+    {
+        // prepare migration array
+        $this->setup();
+        // migrating the above array
+        $this->migrating();
+    }
+
+    // un-migrating
     public function down()
     {
-        $this->dbforge->drop_table('er_settings', TRUE);
-        $this->dbforge->drop_table('er_apps', TRUE);
-        $this->dbforge->drop_table('er_groups', TRUE);
-        $this->dbforge->drop_table('er_users', TRUE);
-        $this->dbforge->drop_table('er_users_ses', TRUE);
-        $this->dbforge->drop_table('er_users_rels', TRUE);
-        $this->dbforge->drop_table('er_permissions', TRUE);
-        $this->dbforge->drop_table('er_logs', TRUE);
+        // prepare migration array
+        $this->setup();
+        // remove migration
+        foreach ($this->migration as $table => $fields)
+        {
+            if(get_instance()->db->count_all($table) == 0)
+            {
+                get_instance()->dbforge->drop_table($table, TRUE);
+            }
+        }
     }
 }
 ?>

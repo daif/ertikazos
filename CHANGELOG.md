@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.3.0 - 2017-04-25
+### Added
+- Add `up` and `down` option for migrate and seed commands.
+- Add `setup` function to migration and seed file to prepare the data array.
+
+### Changed
+- Rollback the migration or the seed using `down` option.
+
+### Removed
+- Remove rollback command.
+- Remove version_by_name function.
+
 ## 1.2.0 - 2017-03-23
 ### Added
 - Implement ErtikazOS store.
@@ -36,6 +48,6 @@ make_label function can used to print the input label.
 - Remove unused $models variable from ER_Controller.
 - Remove unneeded files.
 
-## [1.0.0] - 2016-10-02
+## 1.0.0 - 2016-10-02
 ### Added
 - Initial Commit.
