@@ -76,6 +76,8 @@ class Creator extends ER_Controller {
             }
         }
         $this->_print("", "", "\n");
+        $this->_print("ErtikazOS: ", "", "");
+        $this->_print($this::ER_VERSION, "warning", "\n\n");
         $this->_print("Usage:", "warning", "\n");
 
         foreach ($this->commands as $key => $command) {

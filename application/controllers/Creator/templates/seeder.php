@@ -12,15 +12,38 @@ class {class_name} extends ER_Seeder {
         parent::__construct();
     }
 
-    public function up()
+    /**
+     * prepare the seeds array
+     *
+     * @return  void
+     */
+    public function setup()
     {
         // seeds array
         // $this->seeds[''] = [];
-        // seeding the above array
+    }
+
+    // seeding 
+    public function up()
+    {
+        // prepare seeds array
+        $this->setup();
+        // seeding the seeds
         $this->seeding();
     }
 
+    // un-seeding 
     public function down()
     {
+        // prepare seeds array
+        $this->setup();
+        // delete the seeded data
+        foreach ($this->seeds as $table => $rows)
+        {
+            foreach ($rows as $key => $where)
+            {
+                get_instance()->db->delete($table, $where);
+            }            
+        }
     }
 }
