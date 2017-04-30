@@ -51,7 +51,7 @@ class Watchdog extends ER_Controller {
     public function postList()
     {
         $this->search_button = true;
-        $input = $this->input->post(array_keys($this->watchdog->forms['search']));
+        $input = $this->input->post(array_keys($this->watchdog->forms('search')));
         $this->form_validation->set_rules($this->watchdog->rules('search'));
 
         if ($this->form_validation->run() === TRUE)

@@ -39,22 +39,6 @@ class Watchdog_model extends ER_Model {
     public $permission = 777;
 
     /**
-     * The array of Form Validation rules.
-     *
-     * @var array
-     */
-    public $rules = [
-        'log_id'        => '',
-        'log_date'      => '',
-        'log_type'      => 'min_length[1]',
-        'log_ip'        => 'valid_ip',
-        'log_app_id'    => 'integer',
-        'log_user_id'   => 'integer',
-        'log_variables' => '',
-        'log_time'      => '',
-    ];
-
-    /**
      * The array of the row action buttons.
      *
      * @var array
@@ -67,15 +51,7 @@ class Watchdog_model extends ER_Model {
         ],
         'show' => [
             'class' => 'glyphicon glyphicon-eye-open',
-        ],
-        'edit' => [
-            'class' => 'glyphicon glyphicon-edit',
-        ], 
-
-        'delete' => [
-            'class' => 'glyphicon glyphicon-remove',
-            'method' => 'post',
-        ],
+        ]
     ];
 
     /**
@@ -83,62 +59,75 @@ class Watchdog_model extends ER_Model {
      *
      * @var array
      */
-    public $forms = array(
-        '*' => array(
-            'log_id'    => array(
-                'field' => 'log_id'
-            ),
-            'log_date'  => array(
-                'field' => 'log_date'
-            ),
-            'log_type'  => array(
-                'field' => 'log_type'
-            ),
-            'log_ip'  => array(
-                'field' => 'log_ip'
-            ),
-            'log_app_id'  => array(
+    public $forms = [
+        '*' => [
+            'log_id'    => [
+                'field' => 'log_id',
+                'rules' => ''
+            ],
+            'log_date'  => [
+                'field' => 'log_date',
+                'rules' => ''
+            ],
+            'log_type'  => [
+                'field' => 'log_type',
+                'rules' => 'min_length[1]'
+            ],
+            'log_ip'  => [
+                'field' => 'log_ip',
+                'rules' => 'valid_ip'
+            ],
+            'log_app_id'  => [
                 'field' => 'log_app_id',
+                'rules' => 'integer',
                 'type'  => 'select:hasOne[Admin/App][app_id]'
-            ),
-            'log_user_id'  => array(
+            ],
+            'log_user_id'  => [
                 'field' => 'log_user_id',
+                'rules' => 'integer',
                 'type'  => 'select:hasOne[Admin/User][user_id]'
-            ),
-            'log_variables'  => array(
-                'field' => 'log_variables'
-            ),
-            'log_time'  => array(
-                'field' => 'log_time'
-            ),
-        ),
-        'list' => array(
-            'log_id'        => array(),
-            'log_date'      => array(),
-            'log_type'      => array(),
-            'log_ip'        => array(),
-            'log_app_id'    => array(),
-            'log_user_id'   => array(),
-            'log_time'      => array(),
-        ),
-        'search' => array(
-            'log_type'      => array(),
-            'log_ip'        => array(),
-            'log_app_id'    => array(),
-            'log_user_id'   => array(),
-        ),
-        'show' => array(
-            'log_id'        => array(),
-            'log_date'      => array(),
-            'log_type'      => array(),
-            'log_ip'        => array(),
-            'log_app_id'    => array(),
-            'log_user_id'   => array(),
-            'log_variables' => array(),
-            'log_time'      => array(),
-        ),
-    );
+            ],
+            'log_variables'  => [
+                'field' => 'log_variables',
+                'rules' => ''
+            ],
+            'log_time'  => [
+                'field' => 'log_time',
+                'rules' => ''
+            ]
+        ],
+        'list' => [
+            'log_id'        => [],
+            'log_date'      => [],
+            'log_type'      => [],
+            'log_ip'        => [],
+            'log_app_id'    => [],
+            'log_user_id'   => [],
+            'log_time'      => [],
+        ],
+        'search' => [
+            'log_type'      => [],
+            'log_ip'        => [],
+            'log_app_id'    => [],
+            'log_user_id'   => [],
+        ],
+        'show' => [
+            'log_id'        => [],
+            'log_date'      => [],
+            'log_type'      => [],
+            'log_ip'        => [],
+            'log_app_id'    => [],
+            'log_user_id'   => [],
+            'log_variables' => [],
+            'log_time'      => [],
+        ]
+    ];
 
+    /**
+     * Class constructor
+     *
+     * @return  void
+     */
     public function __construct()
     {
         parent::__construct();

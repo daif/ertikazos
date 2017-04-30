@@ -1,5 +1,5 @@
 
-<?php echo make_search_form('Admin/App/list', $this->app->forms('search')) ?>
+<?php echo make_search_form($this->app->forms('search'), 'Admin/App/list') ?>
 
 <div class="panel panel-default">
     <div class="panel-body">

@@ -22,7 +22,7 @@ class ER_Model extends CI_Model {
      *
      * @var array
      */
-    public $fields = array();
+    public $fields = [];
 
     /**
      * The primary key for the model.
@@ -82,25 +82,27 @@ class ER_Model extends CI_Model {
     public $permission = 700;
 
     /**
+     * Strip HTML and PHP tags from a string.
+     *
+     * @var integer
+     */
+    public $stripTags = true;
+
+    /**
      * The array of related models
      *
      * @var array
      */
-    public $relations = array();
+    public $relations = [];
 
     /**
-     * The array of Form Validation rules.
-     * please refer to this link
-     * http://www.codeigniter.com/user_guide/libraries/form_validation.html#rule-reference 
+     * The array of the forms input fields with rules.
      *
-     * @var array
-     */
-    public $rules = [
-        '*' => ['required']
-    ];
-
-    /**
-     * The array of the forms input fields.
+     * please refer to this link for rules
+     * https://www.codeigniter.com/user_guide/libraries/form_validation.html#rule-reference 
+     * 
+     * and this link for forms
+     * https://www.codeigniter.com/user_guide/helpers/form_helper.html
      *
      * @var array
      */
@@ -147,6 +149,23 @@ class ER_Model extends CI_Model {
     }
 
     /**
+     * __set magic
+     *
+     * Set models variable and apply strip_tags if its enabled.
+     *
+     * @param   string  $name
+     * @param   mixed   $value
+     */
+    public function __set($name, $value)
+    {
+        if($this->stripTags && is_string($value))
+        {
+            $value = strip_tags($value);
+        }
+        $this->$name = $value;
+    }
+
+    /**
      * get table fields array 
      *
      * @return  array
@@ -162,73 +181,59 @@ class ER_Model extends CI_Model {
     /**
      * get forms function
      *
+     * @param   string   $form the form name.
      * @return  array
      */
     public function forms($form) {
-        return $this->rules($form, TRUE);
-    }
-
-    /**
-     * get rules for the form
-     *
-     * @param  string   $form the form name.
-     * @param  boolean  $merge_all true will merge type ti used in forms . 
-     * @return  array
-     */
-    public function rules($form, $merge_all = FALSE) {
-        if(isset($this->rules))
+        if(!isset($this->forms['*']) || !is_array($this->forms['*']))
         {
-            foreach ($this->rules as $key => $value)
-            {
-                $value = trim($value);
-                // merge asterisk array with $form array
-                if(isset($this->forms[$form][$key]))
-                {
-                    // merge field
-                    if(!isset($this->forms[$form][$key]['field']) && isset($this->forms['*'][$key]['field']))
-                    {
-                        $this->forms[$form][$key]['field'] = $this->forms['*'][$key]['field'];
-                    }
-                    // merge label
-                    if(!isset($this->forms[$form][$key]['label']) && isset($this->forms['*'][$key]['label']))
-                    {
-                        $this->forms[$form][$key]['label'] = $this->forms['*'][$key]['label'];
-                    }
+            show_error('$this->forms[\'*\'] array is not defined in '.get_called_class(), '500');
+        }
 
-                    if($merge_all)
+        if(!isset($this->forms[$form]) || !is_array($this->forms[$form]))
+        {
+            show_error('$this->forms[\''.$form.'\'] array is not defined in '.get_called_class(), '500');
+        }
+        // start merging * from with this form.
+        foreach ($this->forms[$form] as $key => $value)
+        {
+            foreach (['field'=>'', 'rules'=>'', 'label'=>'', 'class'=>'', 'type'=>'text'] as $merge_key => $merge_value)
+            {
+                if(!isset($this->forms[$form][$key][$merge_key]))
+                {
+                    if(isset($this->forms['*'][$key][$merge_key]))
                     {
-                        // merge class
-                        if(!isset($this->forms[$form][$key]['class']) && isset($this->forms['*'][$key]['class']))
-                        {
-                            $this->forms[$form][$key]['class'] = $this->forms['*'][$key]['class'];
-                        }
-                        // merge type
-                        if(!isset($this->forms[$form][$key]['type']))
-                        {
-                            if(isset($this->forms['*'][$key]['type']))
-                            {
-                                $this->forms[$form][$key]['type'] = $this->forms['*'][$key]['type'];
-                            }
-                            else
-                            {
-                                $this->forms[$form][$key]['type'] = 'text';
-                            }
-                        }
+                        $this->forms[$form][$key][$merge_key] = $this->forms['*'][$key][$merge_key];
                     }
-                    // set rules if it doesn't
-                    if(!isset($this->forms[$form][$key]['rules']) && $value !== '')
+                    else
                     {
-                        $this->forms[$form][$key]['rules'] = $value;
-                    }
-                    // remove the rules if it's empty
-                    if(isset($this->forms[$form][$key]['rules']) && $this->forms[$form][$key]['rules'] === '')
-                    {
-                        unset($this->forms[$form][$key]['rules']);
+                        $this->forms[$form][$key][$merge_key] = $merge_value;
                     }
                 }
             }
         }
         return $this->forms[$form];
+    }
+
+    /**
+     * get rules for the form
+     *
+     * @param   string   $form the form name.
+     * @return  array
+     */
+    public function rules($form) {
+        $rules = [];
+        $form  = $this->forms($form);
+        foreach ($form as $key => $value)
+        {
+            if(isset($form[$key]['rules']) && trim($form[$key]['rules']) != '')
+            {
+                $rules[$key]['field'] = $form[$key]['field'];
+                $rules[$key]['label'] = $form[$key]['label'];
+                $rules[$key]['rules'] = $form[$key]['rules'];
+            }
+        }
+        return $rules;
     }
 
     /**
@@ -489,7 +494,7 @@ class ER_Model extends CI_Model {
         $otherOctal = substr($this->getPermission(), 2, 1);
 
         // ignore the permission if it is not supported
-        if(!in_array($permission, array('show','list','edit','delete')))
+        if(!in_array($permission, ['show','list','edit','delete']))
         {
             return FALSE;
         }
@@ -499,11 +504,11 @@ class ER_Model extends CI_Model {
         {
             return TRUE;
         }
-        if($permission == 'edit' && in_array($otherOctal, array(2,3,6,7)))
+        if($permission == 'edit' && in_array($otherOctal, [2,3,6,7]))
         {
             return TRUE;
         }
-        if($permission == 'delete' && in_array($otherOctal, array(1,3,5,7)))
+        if($permission == 'delete' && in_array($otherOctal, [1,3,5,7]))
         {
             return TRUE;
         }
@@ -511,15 +516,15 @@ class ER_Model extends CI_Model {
         // if user is available check user permission
         if($this->getCreateBy())
         {
-            if(($permission == 'show' || $permission == 'list') && in_array($userOctal, array(4,5,6,7)) && $this->getCreateBy() == $ci->userdata->user_id)
+            if(($permission == 'show' || $permission == 'list') && in_array($userOctal, [4,5,6,7]) && $this->getCreateBy() == $ci->userdata->user_id)
             {
                 return TRUE;
             }
-            if($permission == 'edit' && in_array($userOctal, array(2,3,6,7)) && $this->getCreateBy() == $ci->userdata->user_id)
+            if($permission == 'edit' && in_array($userOctal, [2,3,6,7]) && $this->getCreateBy() == $ci->userdata->user_id)
             {
                 return TRUE;
             }
-            if($permission == 'delete' && in_array($userOctal, array(1,3,5,7)) && $this->getCreateBy() == $ci->userdata->user_id)
+            if($permission == 'delete' && in_array($userOctal, [1,3,5,7]) && $this->getCreateBy() == $ci->userdata->user_id)
             {
                 return TRUE;
             }
@@ -528,7 +533,7 @@ class ER_Model extends CI_Model {
         // if user is available check user groups permission
         if($this->getCreateBy())
         {
-            $createByGroups = array();
+            $createByGroups = [];
             // first find the created by user groups
             $createByUser = $ci->user->find($this->getCreateBy());
             foreach ($createByUser->groups() as $key => $group)
@@ -540,15 +545,15 @@ class ER_Model extends CI_Model {
             {
                 if(in_array($group->group_id, $createByGroups))
                 {
-                    if(($permission == 'show' || $permission == 'list') && in_array($groupOctal, array(4,5,6,7)))
+                    if(($permission == 'show' || $permission == 'list') && in_array($groupOctal, [4,5,6,7]))
                     {
                         return TRUE;
                     }
-                    if($permission == 'edit' && in_array($groupOctal, array(2,3,6,7)))
+                    if($permission == 'edit' && in_array($groupOctal, [2,3,6,7]))
                     {
                         return TRUE;
                     }
-                    if($permission == 'delete' && in_array($groupOctal, array(1,3,5,7)))
+                    if($permission == 'delete' && in_array($groupOctal, [1,3,5,7]))
                     {
                         return TRUE;
                     }
@@ -611,7 +616,7 @@ class ER_Model extends CI_Model {
         {
             $otherKey   = ($otherKey    === NULL)?$this->loadRelated($relation)->getKeyName:$otherKey;
             $foreignKey = ($foreignKey  === NULL)?$this->getForeignKey($this->$relation->getKeyName()):$foreignKey;
-            return $this->loadRelated($relation)->row(array($otherKey=>$this->$foreignKey));
+            return $this->loadRelated($relation)->row([$otherKey=>$this->$foreignKey]);
         }
     }
 
@@ -629,7 +634,7 @@ class ER_Model extends CI_Model {
         {
             $otherKey   = ($otherKey    === NULL)?$this->loadRelated($relation)->getKeyName:$otherKey;
             $foreignKey = ($foreignKey  === NULL)?$this->getForeignKey($this->$relation->getKeyName()):$foreignKey;
-            return $this->loadRelated($relation)->rows(array($otherKey=>$this->$foreignKey));
+            return $this->loadRelated($relation)->rows([$otherKey=>$this->$foreignKey]);
         }
     }
 
@@ -658,7 +663,7 @@ class ER_Model extends CI_Model {
      *
      * @return  object or null
      */
-    public function query($columns = array('*'), $where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function query($columns = ['*'], $where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL)
     {
         if(is_array($columns)){
             $columns = implode(',', $columns);
@@ -723,7 +728,7 @@ class ER_Model extends CI_Model {
      * @param  array  $columns
      * @return object
      */
-    public function all($columns = array('*')) {
+    public function all($columns = ['*']) {
         return $this->query($columns)->get()->result(get_called_class());
     }
 
@@ -734,8 +739,8 @@ class ER_Model extends CI_Model {
      * @param  array  $columns
      * @return  object or null
      */
-    public function find($id, $columns = array('*')) {
-        $where = array($this->getKeyName()=>$id);
+    public function find($id, $columns = ['*']) {
+        $where = [$this->getKeyName()=>$id];
         return $this->row($where, $columns);
     }
 
@@ -744,7 +749,7 @@ class ER_Model extends CI_Model {
      *
      * @return  object or null
      */
-    public function row($where = NULL, $columns = array('*'))
+    public function row($where = NULL, $columns = ['*'])
     {
         $query = $this->query($columns, $where);
         return $query->get()->row(0, get_called_class());
@@ -757,7 +762,7 @@ class ER_Model extends CI_Model {
      */
     public function rows($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL)
     {
-        $query = $this->query(array('*'), $where, $limit, $offset, $order_by);
+        $query = $this->query(['*'], $where, $limit, $offset, $order_by);
         return $query->get()->result(get_called_class());
     }
 
@@ -774,7 +779,7 @@ class ER_Model extends CI_Model {
             }
             unset($where[$key]);
         }
-        $query = $this->query(array('*'), $where, $limit, $offset, $order_by);
+        $query = $this->query(['*'], $where, $limit, $offset, $order_by);
         return $query->get()->result(get_called_class());
     }
 
@@ -791,7 +796,7 @@ class ER_Model extends CI_Model {
             }
             unset($where[$key]);
         }
-        $query = $this->query(array('count(*) as count'), $where);
+        $query = $this->query(['count(*) as count'], $where);
         $row   = $query->get()->row_object();
         return $row->count;
     }
@@ -803,7 +808,7 @@ class ER_Model extends CI_Model {
      */
     public function count($where = NULL)
     {
-        $query = $this->query(array('count(*) as count'), $where);
+        $query = $this->query(['count(*) as count'], $where);
         $row   = $query->get()->row_object();
         return $row->count;
     }
@@ -815,8 +820,8 @@ class ER_Model extends CI_Model {
      * @param  array  $columns
      * @return  object or null
      */
-    public function user_find($id, $columns = array('*')) {
-        $where = array($this->getKeyName()=>$id);
+    public function user_find($id, $columns = ['*']) {
+        $where = [$this->getKeyName()=>$id];
         return $this->user_row($where, $columns);
     }
 
@@ -825,7 +830,7 @@ class ER_Model extends CI_Model {
      *
      * @return  object or null
      */
-    public function user_row($where = array(), $limit = NULL, $offset = NULL)
+    public function user_row($where = [], $limit = NULL, $offset = NULL)
     {
         $ci = &get_instance();
         if($this->getCreateByName())
@@ -841,7 +846,7 @@ class ER_Model extends CI_Model {
      *
      * @return  array or null
      */
-    public function user_rows($where = array(), $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function user_rows($where = [], $limit = NULL, $offset = NULL, $order_by = NULL)
     {
         $ci = &get_instance();
         if($this->getCreateByName())
@@ -870,7 +875,7 @@ class ER_Model extends CI_Model {
                 }
                 unset($where[$key]);
             }
-            $query = $this->query(array('*'), $where, $limit, $offset, $order_by);
+            $query = $this->query(['*'], $where, $limit, $offset, $order_by);
             return $query->get()->result(get_called_class());
         }
         show_error('Unable to find createBy field in '.get_called_class(), '500');
@@ -894,7 +899,7 @@ class ER_Model extends CI_Model {
                 }
                 unset($where[$key]);
             }
-            $query = $this->query(array('count(*) as count'), $where);
+            $query = $this->query(['count(*) as count'], $where);
             $row   = $query->get()->row_object();
             return $row->count;
         }
@@ -913,7 +918,7 @@ class ER_Model extends CI_Model {
         {
             $where = (array) $where;
             $where[$this->getCreateByName()] = $ci->userdata->user_id;
-            $query = $this->query(array('count(*) as count'), $where);
+            $query = $this->query(['count(*) as count'], $where);
             $row   = $query->get()->row_object();
             return $row->count;
         }
@@ -927,8 +932,8 @@ class ER_Model extends CI_Model {
      * @param  array  $columns
      * @return  object or null
      */
-    public function group_find($id, $columns = array('*')) {
-        $where = array($this->getKeyName()=>$id);
+    public function group_find($id, $columns = ['*']) {
+        $where = [$this->getKeyName()=>$id];
         return $this->group_row($where, $columns);
     }
 
@@ -937,7 +942,7 @@ class ER_Model extends CI_Model {
      *
      * @return  object or null
      */
-    public function group_row($where = array(), $limit = NULL, $offset = NULL)
+    public function group_row($where = [], $limit = NULL, $offset = NULL)
     {
         $ci = &get_instance();
         if($this->getCreateByName())
@@ -956,7 +961,7 @@ class ER_Model extends CI_Model {
      *
      * @return  array or null
      */
-    public function group_rows($where = array(), $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function group_rows($where = [], $limit = NULL, $offset = NULL, $order_by = NULL)
     {
         $ci = &get_instance();
         if($this->getCreateByName())
@@ -991,7 +996,7 @@ class ER_Model extends CI_Model {
                 }
                 unset($where[$key]);
             }
-            $query = $this->query(array('*'), $where, $limit, $offset, $order_by);
+            $query = $this->query(['*'], $where, $limit, $offset, $order_by);
             return $query->get()->result(get_called_class());
         }
         show_error('Unable to find createBy field in '.get_called_class(), '500');
@@ -1018,7 +1023,7 @@ class ER_Model extends CI_Model {
                 }
                 unset($where[$key]);
             }
-            $query = $this->query(array('count(*) as count'), $where);
+            $query = $this->query(['count(*) as count'], $where);
             $row   = $query->get()->row_object();
             return $row->count;
         }
@@ -1040,7 +1045,7 @@ class ER_Model extends CI_Model {
                         SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.(int)$ci->userdata->user_id.'
                     ) UNION SELECT '.(int)$ci->userdata->user_id.')';
             $where['sql'][$this->getCreateByName().' IN '] = $sql;
-            $query = $this->query(array('count(*) as count'), $where);
+            $query = $this->query(['count(*) as count'], $where);
             $row   = $query->get()->row_object();
             return $row->count;
         }
@@ -1053,7 +1058,7 @@ class ER_Model extends CI_Model {
      * @return  object or FALSE
      */
     public function insert() {
-        $data   = array();
+        $data   = [];
         foreach ($this->fields() as $key => $field)
         {
             // if createAt is available and name equal to current field, set to current time
@@ -1113,7 +1118,7 @@ class ER_Model extends CI_Model {
      * @return  object or FALSE
      */
     public function update() {
-        $data   = array();
+        $data   = [];
         if(isset($this->{$this->getKeyName()}))
         {
             foreach ($this->fields() as $key => $field)
@@ -1144,7 +1149,7 @@ class ER_Model extends CI_Model {
                     }
                 }
             }
-            if($this->db->update($this->table, $data, array($this->getKeyName()=>$this->getKey())))
+            if($this->db->update($this->table, $data, [$this->getKeyName()=>$this->getKey()]))
             {
                 return $this->find($this->getKey());
             }
@@ -1175,7 +1180,7 @@ class ER_Model extends CI_Model {
      */
     public function delete()
     {
-        $this->db->delete($this->table, array($this->getKeyName() => $this->getKey()));
+        $this->db->delete($this->table, [$this->getKeyName() => $this->getKey()]);
         if($this->db->affected_rows() == 1)
         {
             return TRUE;

@@ -36,11 +36,40 @@ class {class_name} extends ER_Controller {
     public function getList()
     {
         $this->create_button = true;
+        $this->search_button = true;
         $limit  = 10;
-        $offset = $this->input->get('page');
+        $offset = $this->input->get('page', TRUE);
         $count  = $this->{model_name}->count();
         $this->data['paging'] = make_paging($count, $limit);
         $this->data['rows_list'] = $this->{model_name}->rows();
+    }
+
+    /**
+     *
+     * List Page for this controller.
+     *
+     */
+    public function postList()
+    {
+        $this->create_button = true;
+        $this->search_button = true;
+
+        $input = $this->input->post(array_keys($this->{model_name}->forms('search')), TRUE);
+        $this->form_validation->set_rules($this->{model_name}->rules('search'));
+
+        if (empty($this->{model_name}->rules('search')) || $this->form_validation->run() === TRUE)
+        {
+            $limit  = 10;
+            $offset = $this->input->get('page', TRUE);
+            $count  = $this->{model_name}->count_search($input);
+            $this->data['paging'] = make_paging($count, $limit);
+            $this->data['rows_list'] = $this->{model_name}->search($input, $limit, $offset);
+        }
+        else
+        {
+            set_message($this->form_validation->error_array(), 'error');
+            redirect('/{app_name}/{class_name}/list');
+        }
     }
 
     /**
@@ -74,7 +103,7 @@ class {class_name} extends ER_Controller {
      */
     public function postCreate()
     {
-        $input = $this->input->post(array_keys($this->{model_name}->forms['create']));
+        $input = $this->input->post(array_keys($this->{model_name}->forms('create')), TRUE);
         $this->form_validation->set_rules($this->{model_name}->rules('create'));
 
         if ($this->form_validation->run() === TRUE)
@@ -116,7 +145,7 @@ class {class_name} extends ER_Controller {
      */
     public function postEdit($id)
     {
-        $input = $this->input->post(array_keys($this->{model_name}->forms['edit']));
+        $input = $this->input->post(array_keys($this->{model_name}->forms('edit')), TRUE);
         $this->form_validation->set_rules($this->{model_name}->rules('edit'));
 
         if ($this->form_validation->run() === TRUE)
@@ -150,8 +179,8 @@ class {class_name} extends ER_Controller {
      */
     public function postDelete()
     {
-        $input = $this->input->post(array_keys($this->{model_name}->forms['delete']));
-        ${model_name} = $this->{model_name}->user_find($input[$this->{model_name}->primaryKey]);
+        $input = $this->input->post(array_keys($this->{model_name}->forms('delete')), TRUE);
+        ${model_name} = $this->{model_name}->find($input[$this->{model_name}->primaryKey]);
         if(is_object(${model_name}))
         {
             ${model_name}->delete();

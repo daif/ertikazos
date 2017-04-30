@@ -237,6 +237,11 @@ class Make_Command extends Command {
                     if(copy($templates_path.'lang.php', $lang_dir.'/'.strtolower(trim($app_name,'/')).'_lang.php'))
                     {
                         $this->_print(str_replace(APPPATH, '',$lang_dir).'/'.strtolower(trim($app_name,'/')).'_lang.php'.' Created', 'success');
+                        // replace {app_name}, {class_name}
+                        $lang_data = file_get_contents($lang_dir.'/'.strtolower(trim($app_name,'/')).'_lang.php');
+                        $lang_data = str_replace('{class_name}', $class_name, $lang_data);
+                        $lang_data = str_replace('{app_name}', trim($app_name,'/'), $lang_data);
+                        file_put_contents($lang_dir.'/'.strtolower(trim($app_name,'/')).'_lang.php', $lang_data);
                     }
                     else
                     {
@@ -253,6 +258,11 @@ class Make_Command extends Command {
                         $app_lang_line = "\$lang['".strtolower(trim($app_name,'/'))."'] = '".ucfirst(trim($app_name,'/'))."';\n";
                         file_put_contents($lang_dir.'/global_'.strtolower(trim($app_name,'/')).'_lang.php', $app_lang_line, FILE_APPEND);
                         $this->_print(str_replace(APPPATH, '',$lang_dir).'/global_'.strtolower(trim($app_name,'/')).'_lang.php'.' Created', 'success');
+                        // replace {app_name}, {class_name}
+                        $lang_data = file_get_contents($lang_dir.'/'.strtolower(trim($app_name,'/')).'_lang.php');
+                        $lang_data = str_replace('{class_name}', $class_name, $lang_data);
+                        $lang_data = str_replace('{app_name}', trim($app_name,'/'), $lang_data);
+                        file_put_contents($lang_dir.'/'.strtolower(trim($app_name,'/')).'_lang.php', $lang_data);
                     }
                     else
                     {
@@ -352,11 +362,11 @@ class Make_Command extends Command {
                     continue;
                 }
                 $class_data = file_get_contents($view_file);
-                $class_data = str_ireplace('{class_name}', $class_name, $class_data);
-                $class_data = str_ireplace('{app_name}', trim($app_name,'/'), $class_data);
+                $class_data = str_replace('{class_name}', $class_name, $class_data);
+                $class_data = str_replace('{app_name}', trim($app_name,'/'), $class_data);
 
-                $class_data = str_ireplace('{Class_name}', ucfirst($class_name), $class_data);
-                $class_data = str_ireplace('{App_name}', ucfirst(trim($app_name,'/')), $class_data);
+                $class_data = str_replace('{Class_name}', ucfirst($class_name), $class_data);
+                $class_data = str_replace('{App_name}', ucfirst(trim($app_name,'/')), $class_data);
 
                 if(file_put_contents(APPPATH.$class_file, $class_data))
                 {

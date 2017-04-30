@@ -74,24 +74,6 @@ class User_model extends ER_Model {
     public $permission = 777;
 
     /**
-     * The array of Form Validation rules.
-     *
-     * @var array
-     */
-    public $rules = array(
-        'user_id'      => 'integer',
-        'user_type'    => 'required|integer',
-        'user_name'    => 'required|min_length[3]',
-        'user_email'   => 'required|valid_email',
-        'user_pass'    => 'min_length[8]|max_length[16]',
-        'user_pconf'   => 'required|matches[user_pass]',
-        'user_mobile'  => 'required|min_length[10]',
-        'user_avatar'  => '',
-        'user_code'    => 'required|integer',
-        'user_status'  => 'required|integer',
-    );
-
-    /**
      * The array of the row action buttons.
      *
      * @var array
@@ -120,117 +102,127 @@ class User_model extends ER_Model {
      *
      * @var array
      */
-    public $forms = array(
-        '*' => array(
-            'user_id'    => array(
-                'field' => 'user_id'
-            ),
-            'user_type'  => array(
+    public $forms = [
+        '*' => [
+            'user_id' => [
+                'field' => 'user_id',
+                'rules' => 'integer'
+            ],
+            'user_type' => [
                 'field' => 'user_type',
+                'rules' => 'required|integer',
                 'type'  => 'select:hasOne[Admin/Setting][value][name^=user_type]'
-            ),
-            'user_name'  => array(
-                'field' => 'user_name'
-            ),
-            'user_email' => array(
-                'field' => 'user_email'
-            ),
-            'user_pass' => array(
+            ],
+            'user_name' => [
+                'field' => 'user_name',
+                'rules' => 'required|min_length[3]'
+            ],
+            'user_email' => [
+                'field' => 'user_email',
+                'rules' => 'required|valid_email'
+            ],
+            'user_pass' => [
                 'field' => 'user_pass',
+                'rules' => 'min_length[8]|max_length[16]',
                 'type'  => 'password'
-            ),
-            'user_pconf' => array(
+            ],
+            'user_pconf' => [
                 'field'  => 'user_pconf',
+                'rules'  => 'required|matches[user_pass]',
                 'type'   => 'password'
-            ),
-            'user_mobile'  => array(
+            ],
+            'user_mobile' => [
                 'field' => 'user_mobile',
+                'rules' => 'required|min_length[10]',
                 'type'  => 'mobile'
-            ),
-            'user_avatar'  => array(
+            ],
+            'user_avatar' => [
                 'field' => 'user_avatar',
+                'rules'  => '',
                 'type'  => 'select:hasOne[Admin/User::avatars][avatar]'
-            ),
-            'user_code'  => array(
-                'field' => 'user_code'
-            ),
-            'user_status'  => array(
+            ],
+            'user_code' => [
+                'field' => 'user_code',
+                'rules' => 'required|integer'
+            ],
+            'user_status'  => [
                 'field' => 'user_status',
+                'rules' => 'required|integer',
                 'type'  => 'select:hasOne[Admin/Setting][value][name^=user_status]'
-            ),
-        ),
-        'list' => array(
-            'user_id'    => array(),
-            'user_type'  => array(),
-            'user_name'  => array(),
-            'user_email' => array(),
-            'user_mobile'  => array(),
-            'user_status'  => array(),
-        ),
-        'search' => array(
-            'user_name'  => array(
+            ],
+        ],
+        'list' => [
+            'user_id'    => [],
+            'user_type'  => [],
+            'user_name'  => [],
+            'user_email' => [],
+            'user_mobile'  => [],
+            'user_status'  => [],
+        ],
+        'search' => [
+            'user_name'  => [
                 'rules'     => 'min_length[3]'
-            ),
-            'user_email' => array(
+            ],
+            'user_email' => [
                 'rules'     => 'valid_email'
-            ),
-        ),
-        'create' => array(
-            'user_type'  => array(),
-            'user_name'  => array(),
-            'user_email' => array(),
-            'user_pass'  => array(),
-            'user_mobile'  => array(),
-            'user_status'  => array(),
-        ),
-        'edit' => array(
-            'user_id'    => array(
+            ],
+        ],
+        'create' => [
+            'user_type'  => [],
+            'user_name'  => [],
+            'user_email' => [],
+            'user_pass'  => [],
+            'user_mobile'  => [],
+            'user_status'  => [],
+        ],
+        'edit' => [
+            'user_id'    => [
                 'type'  =>'hidden'
-            ),
-            'user_type'  => array(),
-            'user_name'  => array(),
-            'user_email' => array(),
-            'user_pass'  => array(),
-            'user_mobile'  => array(),
-            'user_status'  => array(),
-        ),
-        'show' => array(
-            'user_id'    => array(),
-            'user_type'  => array(),
-            'user_name'  => array(),
-            'user_email' => array(),
-            'user_mobile'  => array(),
-            'user_status'  => array(),
-        ),
-        'edit_account' => array(
-            'user_name'  => array(),
-            'user_email' => array(),
-            'user_pass'  => array(),
-            'user_mobile'  => array(),
-            'user_avatar'  => array(),
-        ),
-        'register' => array(
-            'user_name'  => array(),
-            'user_email' => array(
+            ],
+            'user_type'  => [],
+            'user_name'  => [],
+            'user_email' => [],
+            'user_pass'  => [],
+            'user_mobile'  => [],
+            'user_status'  => [],
+        ],
+        'show' => [
+            'user_id'    => [],
+            'user_type'  => [],
+            'user_name'  => [],
+            'user_email' => [],
+            'user_mobile'  => [],
+            'user_status'  => [],
+        ],
+        'edit_account' => [
+            'user_name'  => [],
+            'user_email' => [],
+            'user_pass'  => [],
+            'user_mobile'  => [],
+            'user_avatar'  => [],
+        ],
+        'register' => [
+            'user_name'  => [],
+            'user_email' => [
                 'rules'   =>'required|valid_email|is_unique[er_users.user_email]'
-            ),
-            'user_pass'  => array(),
-            'user_pconf' => array(),
-        ),
-        'lost' => array(
-            'user_email' => array(),
-        ),
-        'reset' => array(
-            'user_email' => array(),
-            'user_code' => array(),
-            'user_pass'  => array(),
-        ),
-        'delete' => array(
-            'user_id'   => array(
+            ],
+            'user_pass'  => [],
+            'user_pconf' => [],
+        ],
+        'lost' => [
+            'user_email' => [],
+        ],
+        'reset' => [
+            'user_email' => [],
+            'user_code' => [],
+            'user_pass'  => [],
+        ],
+        'delete' => [
+            'user_id'   => [
                 'type'  => 'hidden'
-            ),
-        ),
-    );
+            ],
+        ],
+    ];
 
     public function __construct($id=NULL)
     {

@@ -9,6 +9,7 @@ class Ertikazos_Seeder extends ER_Seeder {
      */
     function __construct()
     {
+        parent::__construct();
         get_instance()->load->model('Admin/App_model');
         get_instance()->load->model('Admin/User_model');
         get_instance()->load->model('Admin/Group_model');
@@ -56,7 +57,7 @@ class Ertikazos_Seeder extends ER_Seeder {
             // Admin application
             array(
                 'app_path'      => 'Admin',
-                'app_icon'      => 'fa fa-wrench',
+                'app_icon'      => 'fa fa-cog',
                 'app_sort'      => '99',
                 'app_menu'      => App_model::MENU_SHOW,
                 'app_access'    => App_model::ACCESS_AUTHORIZED,
@@ -64,42 +65,42 @@ class Ertikazos_Seeder extends ER_Seeder {
             ),
             array(
                 'app_path'      => 'Admin/Config',
-                'app_icon'      => 'fa fa-gears',
+                'app_icon'      => 'fa fa-cogs',
                 'app_menu'      => App_model::MENU_SHOW,
                 'app_access'    => App_model::ACCESS_AUTHORIZED,
                 'app_status'    => App_model::STATUS_ACTIVE
             ),
             array(
                 'app_path'      => 'Admin/Setting',
-                'app_icon'      => 'fa fa-gears',
+                'app_icon'      => 'fa fa-cogs',
                 'app_menu'      => App_model::MENU_SHOW,
                 'app_access'    => App_model::ACCESS_AUTHORIZED,
                 'app_status'    => App_model::STATUS_ACTIVE
             ),
             array(
                 'app_path'      => 'Admin/App',
-                'app_icon'      => 'fa fa-gears',
+                'app_icon'      => 'fa fa-cogs',
                 'app_menu'      => App_model::MENU_SHOW,
                 'app_access'    => App_model::ACCESS_AUTHORIZED,
                 'app_status'    => App_model::STATUS_ACTIVE
             ),
             array(
                 'app_path'      => 'Admin/Group',
-                'app_icon'      => 'fa fa-gears',
+                'app_icon'      => 'fa fa-cogs',
                 'app_menu'      => App_model::MENU_SHOW,
                 'app_access'    => App_model::ACCESS_AUTHORIZED,
                 'app_status'    => App_model::STATUS_ACTIVE
             ),
             array(
                 'app_path'      => 'Admin/User',
-                'app_icon'      => 'fa fa-gears',
+                'app_icon'      => 'fa fa-cogs',
                 'app_menu'      => App_model::MENU_SHOW,
                 'app_access'    => App_model::ACCESS_AUTHORIZED,
                 'app_status'    => App_model::STATUS_ACTIVE
             ),
             array(
                 'app_path'      => 'Admin/Watchdog',
-                'app_icon'      => 'fa fa-gears',
+                'app_icon'      => 'fa fa-cogs',
                 'app_menu'      => App_model::MENU_SHOW,
                 'app_access'    => App_model::ACCESS_AUTHORIZED,
                 'app_status'    => App_model::STATUS_ACTIVE

@@ -2140,3 +2140,30 @@ aside.left-panel.collapsed span.nav-label {
 aside.left-panel.collapsed .navigation > ul > li > ul > li > a > span {
   display: inline-block;
 }
+
+/* print media */
+@media print {
+  .content {
+    margin: 0;
+    padding: 0;
+  }
+  .content > .container-fluid {
+    margin: 0;
+    padding: 0;
+  }
+  .content > .container-fluid > .panel{
+    margin: 0;
+    padding: 0;
+  }
+  .content > .container-fluid > .panel > .panel-body{
+    margin: 0;
+    padding: 0;
+  }
+
+  a[href]:after {
+    content: none !important;
+  }
+  abbr[title]:after {
+    content: none !important;
+  }
+}

@@ -70,7 +70,7 @@ class Setting extends ER_Controller {
      */
     public function postCreate()
     {
-        $input = $this->input->post(array_keys($this->setting->forms['create']));
+        $input = $this->input->post(array_keys($this->setting->forms('create')));
         $this->form_validation->set_rules($this->setting->rules('create'));
 
         if ($this->form_validation->run() === TRUE)

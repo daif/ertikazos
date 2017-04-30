@@ -1,4 +1,4 @@
-<?php echo make_search_form('Admin/User/list', $this->user->forms('search')) ?>
+<?php echo make_search_form($this->user->forms('search'), 'Admin/User/list') ?>
 <div class="panel panel-default">
     <div class="panel-body">
 

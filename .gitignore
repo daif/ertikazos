@@ -17,3 +17,6 @@ application/logs/*
 application/packages/*
 !application/packages/.gitkeep
 /vendor/
+public/uploads/*
+!public/uploads/index.html
+!public/uploads/.htaccess

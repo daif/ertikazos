@@ -49,21 +49,6 @@ class App_model extends ER_Model {
     public $permission = 777;
 
     /**
-     * The array of Form Validation rules.
-     *
-     * @var array
-     */
-    public $rules = [
-        'app_id'     => 'integer',
-        'app_path'   => 'required',
-        'app_icon'   => 'required',
-        'app_sort'   => 'required|integer',
-        'app_menu'   => 'required|integer',
-        'app_access' => 'required|integer',
-        'app_status' => 'required|integer',
-    ];
-
-    /**
      * The array of the row action buttons.
      *
      * @var array
@@ -92,83 +77,95 @@ class App_model extends ER_Model {
      *
      * @var array
      */
-    public $forms = array(
-        '*' => array(
-            'app_id'    => array(
-                'field'     => 'app_id'
-            ),
-            'app_path'  => array(
-                'field'     => 'app_path'
-            ),
-            'app_icon'  => array(
-                'field'     => 'app_icon'
-            ),
-            'app_sort'  => array(
+    public $forms = [
+        '*' => [
+            'app_id'    => [
+                'field'     => 'app_id',
+                'rules'     => 'integer'
+            ],
+            'app_path'  => [
+                'field'     => 'app_path',
+                'rules'     => 'required'
+            ],
+            'app_icon'  => [
+                'field'     => 'app_icon',
+                'rules'     => 'required'
+            ],
+            'app_sort'  => [
                 'field'     => 'app_sort',
+                'rules'     => 'required|integer',
                 'type'      => 'range:[1,10]'
-            ),
-            'app_menu'  => array(
+            ],
+            'app_menu'  => [
                 'field'     => 'app_menu',
+                'rules'     => 'required|integer',
                 'type'      => 'select:hasOne[Admin/Setting][value][name^=app_menu]'
-            ),
-            'app_access'=> array(
+            ],
+            'app_access'=> [
                 'field'     => 'app_access',
+                'rules'     => 'required|integer',
                 'type'      => 'select:hasOne[Admin/Setting][value][name^=app_access]'
-            ),
-            'app_status'=> array(
+            ],
+            'app_status'=> [
                 'field'     => 'app_status',
+                'rules'     => 'required|integer',
                 'type'      => 'select:hasOne[Admin/Setting][value][name^=status]'
-            ),
-        ),
-        'list' => array(
-            'app_id'    => array(),
-            'app_path'  => array(),
-            'app_icon'  => array(),
-            'app_sort'  => array(),
-            'app_menu'  => array(),
-            'app_access'=> array(),
-            'app_status'=> array(),
-        ),
-        'search' => array(
-            'app_path'  => array(
+            ],
+        ],
+        'list' => [
+            'app_id'    => [],
+            'app_path'  => [],
+            'app_icon'  => [],
+            'app_sort'  => [],
+            'app_menu'  => [],
+            'app_access'=> [],
+            'app_status'=> [],
+        ],
+        'search' => [
+            'app_path'  => [
                 'rules' => ''
-            ),
-        ),
-        'create' => array(
-            'app_path'  => array(),
-            'app_icon'  => array(),
-            'app_sort'  => array(),
-            'app_menu'  => array(),
-            'app_access'=> array(),
-            'app_status'=> array(),
-        ),
-        'edit' => array(
-            'app_id'    => array(
+            ],
+        ],
+        'create' => [
+            'app_path'  => [],
+            'app_icon'  => [],
+            'app_sort'  => [],
+            'app_menu'  => [],
+            'app_access'=> [],
+            'app_status'=> [],
+        ],
+        'edit' => [
+            'app_id'    => [
                 'type'  =>'hidden'
-            ),
-            'app_path'  => array(),
-            'app_icon'  => array(),
-            'app_sort'  => array(),
-            'app_menu'  => array(),
-            'app_access'=> array(),
-            'app_status'=> array(),
-        ), 
-        'show' => array(
-            'app_id'    => array(),
-            'app_path'  => array(),
-            'app_icon'  => array(),
-            'app_sort'  => array(),
-            'app_menu'  => array(),
-            'app_access'=> array(),
-            'app_status'=> array(),
-        ), 
-        'delete' => array(
-            'app_id'    => array(
+            ],
+            'app_path'  => [],
+            'app_icon'  => [],
+            'app_sort'  => [],
+            'app_menu'  => [],
+            'app_access'=> [],
+            'app_status'=> [],
+        ], 
+        'show' => [
+            'app_id'    => [],
+            'app_path'  => [],
+            'app_icon'  => [],
+            'app_sort'  => [],
+            'app_menu'  => [],
+            'app_access'=> [],
+            'app_status'=> [],
+        ], 
+        'delete' => [
+            'app_id'    => [
                 'type'  =>'hidden'
-            ),
-        ),
-    );
+            ],
+        ],
+    ];
 
+    /**
+     * Class constructor
+     *
+     * @return  void
+     */
     public function __construct()
     {
         parent::__construct();
@@ -220,7 +217,7 @@ class App_model extends ER_Model {
      */
     public function getByPath($app_path)
     {
-        $query = $this->db->get_where($this->table, array('app_path' => trim($app_path, '/')));
+        $query = $this->db->get_where($this->table, ['app_path' => trim($app_path, '/')]);
         return $query->row(0, get_called_class());
     }
 }

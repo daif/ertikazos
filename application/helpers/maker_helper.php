@@ -112,9 +112,11 @@ if ( ! function_exists('make_search_form'))
     /**
      * make search form
      *
-     * @return  string An HTML form
+     * @param   array   array of inputs
+     * @param   string  the form path
+     * @return  string  An HTML form
      */
-    function make_search_form($path='', $input)
+    function make_search_form($input, $path='')
     {
         
         $return  = '<div class="panel panel-default searchBox" style="display:none">'."\n";
@@ -122,7 +124,10 @@ if ( ! function_exists('make_search_form'))
         $return .= make_form_open($path);
         foreach ($input as $key => $input)
         {
-            $return .= '<div class="form-group">'.make_input($input).'</div>'."\n";
+            $return .= '<div class="form-group">'."\n";
+            $return .= make_label($input)."\n";
+            $return .= make_input($input)."\n";
+            $return .= '</div>'."\n";
         }
         $return .= '<button class="btn btn-default" name="search" type="submit">'.lang('search').'</button>'."\n";
         $return .= make_form_close();
@@ -202,10 +207,10 @@ if ( ! function_exists('make_input'))
     function make_input($input, $row = NULL, $suffix = FALSE)
     {
         $return = '';
-        if( ! isset($input['rules']))    $input['rules']  = '';
-        if( ! isset($input['type']))     $input['type']   = (preg_match('/in_list\[.*\]/', $input['rules']))?'select':'text';
-        if( ! isset($input['class']))    $input['class']  = '';
-        if( ! isset($input['extra']))    $input['extra']  = 'class="form-control '.$input['class'].'" data-rules="'.$input['rules'].'"';
+        if(empty($input['rules']))    $input['rules']  = '';
+        if(empty($input['type']))     $input['type']   = (preg_match('/in_list\[.*\]/', $input['rules']))?'select':'text';
+        if(empty($input['class']))    $input['class']  = '';
+        if(empty($input['extra']))    $input['extra']  = 'class="form-control '.$input['class'].'" data-rules="'.$input['rules'].'"';
 
         // convert $row to array
         if(!is_array($row)) 
@@ -604,11 +609,11 @@ if ( ! function_exists('make_label'))
      */
     function make_label($input, $attrs = array())
     {
-        if( ! isset($input['field']))    $input['field'] = '';
-        if( ! isset($input['type']))     $input['type']  = 'text';
-        if( ! isset($input['label']))    $input['label'] = $input['field'];
-        if( ! isset($input['class']))    $input['class'] = '';
-        if( ! is_array($attrs))          $attrs          = array(); 
+        if(empty($input['field']))    $input['field'] = '';
+        if(empty($input['type']))     $input['type']  = 'text';
+        if(empty($input['label']))    $input['label'] = $input['field'];
+        if(empty($input['class']))    $input['class'] = '';
+        if(!is_array($attrs))         $attrs          = array(); 
 
         if(preg_match('/hidden/i', $input['type']))
         {

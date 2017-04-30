@@ -53,10 +53,10 @@ class App extends ER_Controller {
     {
         $this->create_button = true;
         $this->search_button = true;
-        $input = $this->input->post(array_keys($this->app->forms['search']));
+        $input = $this->input->post(array_keys($this->app->forms('search')));
         $this->form_validation->set_rules($this->app->rules('search'));
 
-        if ($this->form_validation->run() === TRUE)
+        if (empty($this->app->rules('search')) || $this->form_validation->run() === TRUE)
         {
             $limit  = 10;
             $offset = $this->input->get('page');
@@ -102,7 +102,7 @@ class App extends ER_Controller {
      */
     public function postCreate()
     {
-        $input = $this->input->post(array_keys($this->app->forms['create']));
+        $input = $this->input->post(array_keys($this->app->forms('create')));
         $this->form_validation->set_rules($this->app->rules('create'));
 
         if ($this->form_validation->run() === TRUE)
@@ -144,7 +144,7 @@ class App extends ER_Controller {
      */
     public function postEdit($id)
     {
-        $input = $this->input->post(array_keys($this->app->forms['edit']));
+        $input = $this->input->post(array_keys($this->app->forms('edit')));
         $this->form_validation->set_rules($this->app->rules('edit'));
 
         if ($this->form_validation->run() === TRUE)
@@ -178,7 +178,7 @@ class App extends ER_Controller {
      */
     public function postDelete()
     {
-        $input = $this->input->post(array_keys($this->app->forms['delete']));
+        $input = $this->input->post(array_keys($this->app->rules('delete')));
         $app = $this->app->find($input[$this->app->primaryKey]);
         if(is_object($app))
         {
