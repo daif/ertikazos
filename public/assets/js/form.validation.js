@@ -1,5 +1,5 @@
 /*
- * Form Validation 0.3
+ * Form Validation 0.3.1
  * Applying CodeIgniter rules in JavaScript 
  * http://www.codeigniter.com/user_guide/libraries/form_validation.html#rule-reference
  * 
@@ -160,7 +160,7 @@ function CI_integer($el, $attr) {
     return(/^[0-9]+$/.test($($el).val()));
 }
 function CI_numeric($el, $attr) {
-    return(/^[0-9]+$/.test($($el).val()));
+    return(/^[0-9]*\.?[0-9]+$/.test($($el).val()));
 }
 function CI_decimal($el, $attr) {
     return(/^(\d+|\d+,\d{1,2})$/.test($($el).val()));

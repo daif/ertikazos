@@ -70,19 +70,6 @@ class Notify_model extends ER_Model {
      */
 
     public $updateBy = 'notify_update_by';
-  
-    /**
-     * The array of Form Validation rules.
-     *
-     * @var array
-     */
-    public $rules = [
-        'notify_id'         =>'required',
-        'notify_user_id'    =>'required|integer',
-        'notify_title'      =>'required',
-        'notify_body'       =>'required',
-        'notify_status'     =>'required|integer',
-    ];
 
     /**
      * The array of the row action buttons.
@@ -105,43 +92,51 @@ class Notify_model extends ER_Model {
      *
      * @var array
      */
-    public $forms = array(
-        '*' => array(
-            'notify_id'    => array(
-                'field' => 'notify_id'
-            ),
-            'notify_title'  => array(
-                'field' => 'notify_title'
-            ),
-            'notify_body'  => array(
-                'field' => 'notify_body'
-            ),
-            'notify_status'  => array(
+    public $forms = [
+        '*' => [
+            'notify_id' => [
+                'field' => 'notify_id',
+                'rules' => 'required'
+            ],
+            'notify_user_id' => [
+                'field' => 'notify_user_id',
+                'rules' => 'required|integer'
+            ],
+            'notify_title' => [
+                'field' => 'notify_title',
+                'rules' => 'required'
+            ],
+            'notify_body' => [
+                'field' => 'notify_body',
+                'rules' => 'required'
+            ],
+            'notify_status' => [
                 'field' => 'notify_status',
+                'rules' => 'required|integer',
                 'type'  => 'select:hasOne[Admin/Setting][value][name^=notify_status]'
-            ),
-        ),
-        'list' => array(
-            'notify_id'     => array(),
-            'notify_title'  => array(),
-            'notify_status'  => array(),
-        ),
-        'search' => array(
-        ),
-        'create' => array(
-            'notify_user_id' => array(),
-            'notify_title'  => array(),
-            'notify_body'  => array(),
-            'notify_status'  => array(),
-        ),
-        'edit' => array(
-        ),
-        'delete' => array(
-            'notify_id'   => array(
-                'type'  => 'hidden'
-            ),
-        ),
-    );
+            ],
+        ],
+        'list' => [
+            'notify_id'     => [],
+            'notify_title'  => [],
+            'notify_status'  => [],
+        ],
+        'search' => [
+        ],
+        'create' => [
+            'notify_user_id' => [],
+            'notify_title' => [],
+            'notify_body' => [],
+            'notify_status' => [],
+        ],
+        'edit' => [
+        ],
+        'delete' => [
+            'notify_id' => [
+                'type' => 'hidden'
+            ],
+        ],
+    ];
 
     public function __construct()
     {

@@ -1,5 +1,35 @@
 # Change Log
 
+## 1.4.0 - 2017-04-30
+### Added
+- Add `stripTags` option to model.
+- Add magic method __set in model to implement strip_tags.
+- Add `postList` function to controller template.
+- Add `parent::__construct` to Ertikazos_Seeder class.
+- Add `make_label` in `make_search_form` function.
+- Add `hidden-print` CSS and print only the page content.
+- Add `@media print` to styles.
+- Add ER_VERSION in footer.
+
+### Changed
+- Rewrite `forms` and `rules` methods in model.
+- Use forms function instead of forms array in all models.
+- Fix CI_numeric in validation.js
+- Update .gitignore to ignore uploads folder.
+- Fix form_validation if rules array is empty.
+- Fix replacing class_name and app_name in language files.
+- Fix replacing class_name and app_name in view_list by using str_replace.
+- Change make_search_form to accept input array as first parameter.
+- Use short array syntax in most of files.
+- Use empty instead of isset in make_input helper.
+- Change Admin application icons.
+- Fix script tag by adding type="text/javascript"
+
+### Removed
+- Remove `$this->rules` array from all models.
+- Remove useless `$this->permission` from Group_model class.
+- Remove bootstrap.css.map line from bootstrap.css
+
 ## 1.3.0 - 2017-04-25
 ### Added
 - Add `up` and `down` option for migrate and seed commands.

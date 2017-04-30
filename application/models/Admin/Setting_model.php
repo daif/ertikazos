@@ -49,18 +49,6 @@ class Setting_model extends ER_Model {
     public $permission = 777;
 
     /**
-     * The array of Form Validation rules.
-     *
-     * @var array
-     */
-    public $rules = [
-        'id'    => '',
-        'name'  => 'required',
-        'value' => 'required',
-        'sort'  => 'integer',
-    ];
-
-    /**
      * The array of the row action buttons.
      *
      * @var array
@@ -92,16 +80,20 @@ class Setting_model extends ER_Model {
     public $forms = array(
         '*' => array(
             'id'    => array(
-                'field' => 'id'
+                'field' => 'id',
+                'rules' => 'integer'
             ),
             'name'  => array(
-                'field' => 'name'
+                'field' => 'name',
+                'rules' => 'required'
             ),
             'value' => array(
-                'field' => 'value'
+                'field' => 'value',
+                'rules' => 'required'
             ),
             'sort'  => array(
                 'field' => 'sort',
+                'rules' => 'integer',
                 'type'  => 'range:[1,10]'
             ),
         ),

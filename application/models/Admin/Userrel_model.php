@@ -25,29 +25,10 @@ class Userrel_model extends ER_Model {
     public $primaryKey = 'rel_id';
 
     /**
-     * The primary Label for the model.
+     * Class constructor
      *
-     * @var string
+     * @return  void
      */
-    public $primaryLabel = 'rel_id';
-
-    /**
-     * The row permission.
-     * @var integer
-     */
-    public $permission = 777;
-
-    /**
-     * The array of Form Validation rules.
-     *
-     * @var array
-     */
-    public $rules = [
-        'rel_id'        =>'integer',
-        'rel_user_id'   =>'integer|required',
-        'rel_group_id'  =>'integer|required',
-    ];
-
     public function __construct()
     {
         parent::__construct();

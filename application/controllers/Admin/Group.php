@@ -71,7 +71,7 @@ class Group extends ER_Controller {
      */
     public function postCreate()
     {
-        $input = $this->input->post(array_keys($this->group->forms['create']));
+        $input = $this->input->post(array_keys($this->group->forms('create')));
         $this->form_validation->set_rules($this->group->rules('create'));
 
         if ($this->form_validation->run() === TRUE)
@@ -125,7 +125,7 @@ class Group extends ER_Controller {
      */
     public function postEdit($id)
     {
-        $input = $this->input->post(array_keys($this->group->forms['edit']));
+        $input = $this->input->post(array_keys($this->group->forms('edit')));
         $this->form_validation->set_rules($this->group->rules('edit'));
 
         if ($this->form_validation->run() === TRUE)
@@ -177,7 +177,7 @@ class Group extends ER_Controller {
      */
     public function postDelete()
     {
-        $input = $this->input->post(array_keys($this->group->forms['delete']));
+        $input = $this->input->post(array_keys($this->group->forms('delete')));
         $group = $this->group->find($input[$this->group->primaryKey]);
         if(is_object($group))
         {

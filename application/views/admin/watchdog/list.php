@@ -1,5 +1,5 @@
 
-<?php echo make_search_form('Admin/Watchdog/list', $this->watchdog->forms('search')) ?>
+<?php echo make_search_form($this->watchdog->forms('search'), 'Admin/Watchdog/list') ?>
 
 <div class="panel panel-default">
     <div class="panel-body">

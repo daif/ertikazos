@@ -37,7 +37,7 @@
 
 
         <!-- Aside Start-->
-        <aside class="left-panel">
+        <aside class="left-panel hidden-print">
 
             <!-- brand -->
             <div class="logo">
@@ -50,7 +50,7 @@
             <!-- / brand -->
         
             <!-- Navbar Start -->
-            <nav class="navigation">
+            <nav class="navigation hidden-print">
                 <ul class="list-unstyled">
                     <?php $apps_list = $this->app->getMenu(); ?>
                     <?php foreach($apps_list as $app) { ?>
@@ -112,7 +112,7 @@
         <section class="content">
             
             <!-- Header -->
-            <header class="top-head container-fluid">
+            <header class="top-head container-fluid hidden-print">
                 <button type="button" class="navbar-toggle <?php echo ($this->session->userdata('lang') == 'arabic')?'pull-right':'pull-left'?>">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
@@ -174,7 +174,7 @@
 
             <div class="wraper container-fluid">
                 
-                <div class="page-title">
+                <div class="page-title hidden-print">
                     <?php if($subapp->breadcrumb) { ?>
                         <ol class="breadcrumb <?php echo ($this->session->userdata('lang') == 'arabic')?'pull-right':'pull-left' ?>" style="margin-bottom: 5px;">
                             <li><a href="<?php echo base_url() ?>"><?php echo lang('home')?></a></li>
@@ -214,15 +214,15 @@
             <!-- Page Content Ends -->
             <!-- ================== -->
             <!-- Footer Start -->
-            <footer class="footer">
-                <?php echo date('Y')?> © <?php echo get_setting('site/name')?>.
+            <footer class="footer hidden-print">
+                <?php echo date('Y')?> © <?php echo get_setting('site/name')?> - v<?php echo ER_Controller::ER_VERSION?>.
             </footer>
             <!-- Footer Ends -->
         </section>
 
 
 
-    <script>
+    <script type="text/javascript">
         $base_url     = '<?php echo base_url()?>';
         $router_dir   = '<?php echo $router_dir?>';
         $router_class = '<?php echo $router_class?>';
@@ -235,21 +235,22 @@
             $locale = 'en';
         <?php } ?>
     </script>
+
     <!-- js -->
-    <script src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/bootstrap.min.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/jquery.nicescroll.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/form.validation.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/moment-with-locales.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/bootstrap-datetimepicker.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/select2.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/bootbox.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/jquery.app.js"></script>
-    <script src="<?php echo base_url(); ?>assets/trumbowyg/trumbowyg.js"></script>
-    <?php if($this->session->userdata('lang') == 'arabic') { ?>
-    <script src="<?php echo base_url(); ?>assets/trumbowyg/langs/ar.min.js"></script>
-    <?php } ?>
-    <script src="<?php echo base_url(); ?>assets/js/ertikaz.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.nicescroll.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/form.validation.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/moment-with-locales.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/bootstrap-datetimepicker.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/select2.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/bootbox.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.app.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/trumbowyg/trumbowyg.js"></script>
+<?php if($this->session->userdata('lang') == 'arabic') { ?>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/trumbowyg/langs/ar.min.js"></script>
+<?php } ?>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/ertikaz.js"></script>
 
     @yield('javascript')
 

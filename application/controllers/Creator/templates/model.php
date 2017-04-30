@@ -75,23 +75,28 @@ class {class_name} extends ER_Model {
     public $permission = 700;
 
     /**
-     * The array of Form Validation rules.
-     * please refer to this link
-     * http://www.codeigniter.com/user_guide/libraries/form_validation.html#rule-reference 
+     * Strip HTML and PHP tags from a string.
      *
-     * @var array
+     * @var integer
      */
-    public $rules = [
-        '*' => ['required']
-    ];
+    public $stripTags = true;
 
     /**
-     * The array of the forms input fields.
+     * The array of the forms input fields with rules.
+     *
+     * please refer to this link for rules
+     * https://www.codeigniter.com/user_guide/libraries/form_validation.html#rule-reference 
+     * 
+     * and this link for forms
+     * https://www.codeigniter.com/user_guide/helpers/form_helper.html
      *
      * @var array
      */
     public $forms = [
-        '*' => [],
+        '*' => [
+            'input' => '',
+            'rules' => ''
+        ],
         'list' => [],
         'edit' => [], 
         'show' => [],
@@ -131,4 +136,5 @@ class {class_name} extends ER_Model {
     function __construct(){
         parent::__construct();
     }
+
 }

@@ -42,17 +42,6 @@ class Group_model extends ER_Model {
     public $permission = 777;
 
     /**
-     * The array of Form Validation rules.
-     *
-     * @var array
-     */
-    public $rules = [
-        'group_id'      => 'integer',
-        'group_name'    => 'required',
-        'group_status'  => 'integer',
-    ];
-
-    /**
      * The array of the row action buttons.
      *
      * @var array
@@ -81,54 +70,56 @@ class Group_model extends ER_Model {
      *
      * @var array
      */
-    public $forms = array(
-        '*' => array(
-            'group_id'    => array(
-                'field' => 'group_id'
-            ),
-            'group_name'  => array(
-                'field' => 'group_name'
-            ),
-            'group_status'  => array(
+    public $forms = [
+        '*' => [
+            'group_id'    => [
+                'field' => 'group_id',
+                'rules'     => 'integer'
+            ],
+            'group_name'  => [
+                'field' => 'group_name',
+                'rules'     => 'required'
+            ],
+            'group_status'  => [
                 'field' => 'group_status',
+                'rules'     => 'integer',
                 'type'  => 'select:hasOne[Admin/Setting][value][name^=status]'
-            ),
-        ),
-        'list' => array(
-            'group_id'      => array(),
-            'group_name'    => array(),
-            'group_status'  => array(),
-        ),
-        'search' => array(
-            'group_name'    => array(),
-        ),
-        'create' => array(
-            'group_name'    => array(),
-            'group_status'  => array(),
-        ),
-        'edit' => array(
-            'group_id'      => array(
+            ],
+        ],
+        'list' => [
+            'group_id'      => [],
+            'group_name'    => [],
+            'group_status'  => [],
+        ],
+        'search' => [
+            'group_name'    => [],
+        ],
+        'create' => [
+            'group_name'    => [],
+            'group_status'  => [],
+        ],
+        'edit' => [
+            'group_id'      => [
                 'type'      =>'hidden'
-            ),
-            'group_name'    => array(),
-            'group_status'  => array(),
-        ), 
-        'show' => array(
-            'group_id'      => array(),
-            'group_name'    => array(),
-            'group_status'  => array(),
-        ), 
-        'delete' => array(
-            'group_id'  => array(
+            ],
+            'group_name'    => [],
+            'group_status'  => [],
+        ], 
+        'show' => [
+            'group_id'      => [],
+            'group_name'    => [],
+            'group_status'  => [],
+        ], 
+        'delete' => [
+            'group_id'  => [
                 'type'  => 'hidden'
-            ),
-        ),
-    );
+            ],
+        ],
+    ];
 
     public function __construct()
     {
         parent::__construct();
-        $this->permission = 777;
     }
 
     public function users($group_id=0)
