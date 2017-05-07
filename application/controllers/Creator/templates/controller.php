@@ -37,11 +37,11 @@ class {class_name} extends ER_Controller {
     {
         $this->create_button = true;
         $this->search_button = true;
-        $limit  = 10;
+        $limit  = 30;
         $offset = $this->input->get('page', TRUE);
         $count  = $this->{model_name}->count();
         $this->data['paging'] = make_paging($count, $limit);
-        $this->data['rows_list'] = $this->{model_name}->rows();
+        $this->data['rows_list'] = $this->{model_name}->rows(NULL, $limit, $offset);
     }
 
     /**
