@@ -162,6 +162,12 @@ class App_model extends ER_Model {
     ];
 
     /**
+     * All Apps array.
+     * @var array
+     */
+    public $apps = [];
+
+    /**
      * Class constructor
      *
      * @return  void
@@ -172,42 +178,48 @@ class App_model extends ER_Model {
     }
 
     /**
+     * load all Apps from DB function
+     *
+     * @return  object
+     */
+    public function loadApps()
+    {
+        if(count($this->apps) == 0)
+        {
+            $this->db->reset_query();
+            $this->db->select('*');
+            $this->db->from($this->table);
+            $this->db->order_by('app_sort ASC, app_id ASC');
+            $rows = $this->db->get()->result(get_called_class());
+            foreach ($rows as $key => $row)
+            {
+                $row->sub = [];
+                $this->apps[$row->app_path] = $row;
+            }
+        }
+    }
+
+    /**
      * getMenu function
      *
      * @return  object
      */
     public function getMenu($app_path = '')
     {
-        if($app_path)
-        {
-            $menu = $this->db->select('*')
-                ->from($this->table)
-                ->where('app_path', $app_path)
-                ->order_by('app_sort ASC, app_id ASC')
-                ->get()
-                ->result(get_called_class());
-        }
-        else
-        {
-            $menu = $this->db->select('*')
-                ->from($this->table)
-                ->not_like('app_path', '/')
-                ->order_by('app_sort ASC, app_id ASC')
-                ->get()
-                ->result(get_called_class());
-        }
+        $this->loadApps();
 
-        foreach ($menu as $key => $app)
+        $app_menu = array_filter($this->apps, function($key) {return !strstr($key, '/');}, ARRAY_FILTER_USE_KEY);
+        $sub_menu = array_filter($this->apps, function($key) {return  strstr($key, '/');}, ARRAY_FILTER_USE_KEY);
+
+        // Add sub application to parent  App
+        foreach ($sub_menu as $key => $sub_app)
         {
-            $menu[$key]->sub = 
-                $this->db->select('*')
-                    ->from($this->table)
-                    ->like('app_path', $app->app_path.'/', 'after')
-                    ->order_by('app_sort ASC, app_id ASC')
-                    ->get()
-                    ->result(get_called_class());
+            if(isset($app_menu[explode('/', $sub_app->app_path)[0]]))
+            {
+                $app_menu[explode('/', $sub_app->app_path)[0]]->sub[] = $sub_app;
+            }
         }
-        return $menu;
+        return $app_menu;
     }
 
     /**
@@ -217,7 +229,11 @@ class App_model extends ER_Model {
      */
     public function getByPath($app_path)
     {
-        $query = $this->db->get_where($this->table, ['app_path' => trim($app_path, '/')]);
-        return $query->row(0, get_called_class());
+        $this->loadApps();
+        if(isset($this->apps[$app_path]))
+        {
+            return $this->apps[$app_path];
+        }
+        return FALSE;
     }
 }

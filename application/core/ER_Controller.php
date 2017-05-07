@@ -13,7 +13,7 @@ class ER_Controller extends CI_Controller{
     /**
      * The current version of ErtikazOS
      */
-    const ER_VERSION = '1.4.0';
+    const ER_VERSION = '1.5.0-dev';
 
     /**
     * The variables array

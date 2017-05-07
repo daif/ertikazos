@@ -79,7 +79,7 @@
                                     <?php } ?>
                                 </ul>
                         <?php } else { ?>
-                            <li class="<?php echo (($router_dir.$router_class == $subapp->app_path)?'active':'') ?>">
+                            <li class="<?php echo (($router_dir.$router_class == $app->app_path)?'active':'') ?>">
                                 <a href="<?php echo base_url($app->app_path) ?>">
                                     <i class="<?php echo $app->app_icon?>"></i> <span class="nav-label"><?php echo lang(strtolower($app->app_path))?></span>
                                 </a>

@@ -134,19 +134,28 @@ if ( ! function_exists('get_setting'))
      */
     function get_setting($name)
     {
+        static $cache;
+
+        $key = md5($name);
+        if(isset($cache[$key]))
+        {
+            return $cache[$key];
+        }
+
+        $cache[$key] = FALSE;
         $setting = get_instance()->setting->rows(['name'=>$name]);
         if(count($setting) == 1)
         {
             if(count($setting) == 1)
             {
-                return $setting[0]->value;
+                $cache[$key] = $setting[0]->value;
             }
             else
             {
-                return $setting;
+                $cache[$key] = $setting;
             }
         }
-        return FALSE;
+        return $cache[$key];
     }
 }
 
