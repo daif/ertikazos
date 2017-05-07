@@ -630,7 +630,8 @@ if ( ! function_exists('make_label'))
             $input['label'] = get_instance()->lang->line($input['label']);
         }
 
-        $attrs['class'] = 'control-label ' .$input['class'];
+        if(empty($attrs['class']))  $attrs['class'] = $input['class'];
+        $attrs['class'] = 'control-label ' .$attrs['class'];
         $label = form_label($input['label'], $input['field'], $attrs);
         return $label;
     }
