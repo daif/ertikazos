@@ -99,17 +99,19 @@ class App_model extends ER_Model {
             'app_menu'  => [
                 'field'     => 'app_menu',
                 'rules'     => 'required|integer',
-                'type'      => 'select:hasOne[Admin/Setting][value][name^=app_menu]'
+                'type'      => 'select:hasOne[Admin/Setting][value][name^=app_menu]',
+                'alias'     => 'app_menu_name'
             ],
             'app_access'=> [
                 'field'     => 'app_access',
                 'rules'     => 'required|integer',
-                'type'      => 'select:hasOne[Admin/Setting][value][name^=app_access]'
+                'type'      => 'select:hasOne[Admin/Setting][value][name^=app_access]',
             ],
             'app_status'=> [
                 'field'     => 'app_status',
                 'rules'     => 'required|integer',
-                'type'      => 'select:hasOne[Admin/Setting][value][name^=status]'
+                'type'      => 'select:hasOne[Admin/Setting][value][name^=status]',
+                'alias'     => 'app_status_name'
             ],
         ],
         'list' => [
@@ -168,6 +170,12 @@ class App_model extends ER_Model {
     public $apps = [];
 
     /**
+     * Apps Menu array.
+     * @var array
+     */
+    public $apps_menu = [];
+
+    /**
      * Class constructor
      *
      * @return  void
@@ -204,22 +212,26 @@ class App_model extends ER_Model {
      *
      * @return  object
      */
-    public function getMenu($app_path = '')
+    public function getMenu()
     {
-        $this->loadApps();
-
-        $app_menu = array_filter($this->apps, function($key) {return !strstr($key, '/');}, ARRAY_FILTER_USE_KEY);
-        $sub_menu = array_filter($this->apps, function($key) {return  strstr($key, '/');}, ARRAY_FILTER_USE_KEY);
-
-        // Add sub application to parent  App
-        foreach ($sub_menu as $key => $sub_app)
+        if(count($this->apps_menu) == 0)
         {
-            if(isset($app_menu[explode('/', $sub_app->app_path)[0]]))
+            $this->loadApps();
+
+            $app_menu = array_filter($this->apps, function($key) {return !strstr($key, '/');}, ARRAY_FILTER_USE_KEY);
+            $sub_menu = array_filter($this->apps, function($key) {return  strstr($key, '/');}, ARRAY_FILTER_USE_KEY);
+
+            // Add sub application to parent  App
+            foreach ($sub_menu as $key => $sub_app)
             {
-                $app_menu[explode('/', $sub_app->app_path)[0]]->sub[] = $sub_app;
+                if(isset($app_menu[explode('/', $sub_app->app_path)[0]]))
+                {
+                    $app_menu[explode('/', $sub_app->app_path)[0]]->sub[] = $sub_app;
+                }
             }
+            $this->apps_menu = $app_menu;
         }
-        return $app_menu;
+        return $this->apps_menu;
     }
 
     /**

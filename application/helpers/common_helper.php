@@ -298,7 +298,7 @@ if ( ! function_exists('send_email'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('send_email_ews'))
+if ( ! function_exists('ews_send_email'))
 {
     /**
      * send email
@@ -311,7 +311,7 @@ if ( ! function_exists('send_email_ews'))
      * @param   string      $template   template file or html
      * @return  boolean     TRUE id success FALSE if fail
      */
-    function send_email_ews($to, $subject, $message, $template='default')
+    function ews_send_email($to, $subject, $message, $template='default')
     {
         $ews_url = get_setting('ews/url');
         $ews_usr = get_setting('ews/user');
@@ -545,7 +545,7 @@ if ( ! function_exists('ews_get_userinfo'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_user_photo'))
+if ( ! function_exists('ews_get_userphoto'))
 {
     /**
      * get user photo
@@ -556,7 +556,7 @@ if ( ! function_exists('get_user_photo'))
      * @param   string      $size     photo size can be, HR48x48,HR64x64,HR96x96,HR120x120 
      * @return  string      photo content if success or FALSE if fail
      */
-    function get_user_photo($email, $size='HR120x120')
+    function ews_get_userphoto($email, $size='HR120x120')
     {
         $ews_url = get_setting('ews/url');
         $ews_usr = get_setting('ews/user');

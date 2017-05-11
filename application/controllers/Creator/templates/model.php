@@ -82,6 +82,20 @@ class {class_name} extends ER_Model {
     public $stripTags = true;
 
     /**
+     * The array of fields that are excluded from stripTags protection
+     *
+     * @var array
+     */
+    public $stripTagsExclude = [];
+
+    /**
+     * The array of related models
+     *
+     * @var array
+     */
+    public $relations = [];
+
+    /**
      * The array of the forms input fields with rules.
      *
      * please refer to this link for rules

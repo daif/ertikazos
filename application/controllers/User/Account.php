@@ -49,6 +49,13 @@ class Account extends ER_Controller {
         $input = $this->input->post(array_keys($this->user->forms['edit_account']));
         $this->form_validation->set_rules($this->user->rules('edit_account'));
 
+        // upload file and get public path
+        $user_avatar = upload_file('user_avatar');
+        if(is_array($user_avatar))
+        {
+            $input['user_avatar'] = substr($user_avatar['full_path'], strlen(FCPATH));
+        }
+
         if ($this->form_validation->run() === TRUE)
         {
             $user = $this->user->find($this->userdata->user_id);

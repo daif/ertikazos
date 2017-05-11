@@ -424,88 +424,24 @@ if ( ! function_exists('make_input_value'))
             return '';
         }
 
+        if($input['type'] == 'file') {
+            // set default label
+            $file_label = get_instance()->lang->line($input['field'], FALSE);
+            
+            // if file is image 
+            if(preg_match('/\.(gif|jpg|jpeg|png)$/i', $row->{$input['field']}))
+            {
+                $file_label = '<img alt="'.get_instance()->lang->line($input['field'], FALSE).'" src="'.base_url(). $row->{$input['field']} .'" style="max-height: 60px;">';
+            }
+            return '<a href="'.base_url(). $row->{$input['field']} .'" target="_blank">'.$file_label.'</a>';
+        }
+
         if(isset($input['alias']) && isset($row->{$input['alias']}))
         {
-            $value_label = $row->$input['alias'];
+            return get_instance()->lang->line($row->{$input['alias']}, FALSE);
         }
 
-        // hasOne[model_name][field_name][where condition]
-        if(preg_match('/select:hasOne\[(.+)\]\[(.+)\](\[.+\]|)/Ui', $input['type'], $match))
-        {
-            // set default model method 
-            $model_method = 'rows';
-            $where        = array();
-            $model        = $match[1];
-            $model_field  = $match[2];
-
-            if(isset($match[3]))
-            {
-              $where_list = explode(',', str_replace(array('[',']'), '', $match[3]));
-                foreach ($where_list as $key => $value)
-                {
-                    // We will use jQuery selector syntax:
-                    // [name^=value] name like value%
-                    // [name$=value] name like %value 
-                    // [name*=value] name like %value% 
-                    // [name=value] name = value
-
-                    if(strpos($value, '^=') !== FALSE)
-                    {
-                        list($where_key, $where_val) =  explode('^=', $value, 2);
-                        $where['like_after'][$where_key] = replace_vars($where_val);
-                    }
-                    else if(strpos($value, '$=') !== FALSE)
-                    {
-                        list($where_key, $where_val) =  explode('$=', $value, 2);
-                        $where['like_before'][$where_key] = replace_vars($where_val);
-                    }
-                    else if(strpos($value, '*=') !== FALSE)
-                    {
-                        list($where_key, $where_val) =  explode('*=', $value, 2);
-                        $where['like_before'][$where_key] = replace_vars($where_val);
-                    }
-                    else if(strpos($value, '=') !== FALSE)
-                    {
-                        list($where_key, $where_val) =  explode('=', $value, 2);
-                        $where[$where_key] = replace_vars($where_val);
-                    }
-                }
-            }
-
-            // try to find method name or use the default method 'rows'
-            if(preg_match('/(.+)::(.+)/i', $model, $model_match))
-            {
-                $model          = $model_match[1];
-                $model_method   = $model_match[2];
-            }
-
-            $hasone_model = load_model($model);
-            $where[$model_field] = $row->{$input['field']};
-            $value_label  = $hasone_model->{$model_method}($where);
-
-            // if the return is array get the first element of the array 
-            if(is_array($value_label))
-            {
-                if(isset($value_label[0]))
-                {
-                    $value_label = $value_label[0];
-                }
-                else
-                {
-                    unset($value_label);
-                }
-            }
-
-            if(isset($value_label))
-            {
-                if(is_object($value_label))
-                {
-                    $value_label  = $value_label->{$hasone_model->getLabelName()};
-                }
-            }
-        }
-
-        return isset($value_label)?lang($value_label):$row->{$input['field']};
+        return get_instance()->lang->line($row->{$input['field']}, FALSE);
     }
 }
 

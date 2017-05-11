@@ -89,6 +89,13 @@ class ER_Model extends CI_Model {
     public $stripTags = true;
 
     /**
+     * The array of fields that are excluded from stripTags protection
+     *
+     * @var array
+     */
+    public $stripTagsExclude = [];
+
+    /**
      * The array of related models
      *
      * @var array
@@ -146,6 +153,19 @@ class ER_Model extends CI_Model {
      */
     function __construct(){
         parent::__construct();
+        // build the relations array from the forms array.
+        foreach ($this->forms['*'] as $key => $column)
+        {
+            if(!isset($column['type'])) continue;
+            if(preg_match('/select:hasOne\[(.+)\]\[(.+)\](\[.+\]|)/Ui', $column['type'], $match))
+            {
+                if(preg_match('/(.+)::(.+)/i', $match[1], $model_match))
+                {
+                    $match[1]          = $model_match[1];
+                }
+                $this->relations[$key] = ['model'=>$match[1], 'key'=>$match[2], 'where'=>$match[3]];
+            }
+        }
     }
 
     /**
@@ -158,7 +178,7 @@ class ER_Model extends CI_Model {
      */
     public function __set($name, $value)
     {
-        if($this->stripTags && is_string($value))
+        if($this->stripTags && !in_array($name, $this->stripTagsExclude) && is_string($value))
         {
             $value = strip_tags($value);
         }
@@ -197,7 +217,7 @@ class ER_Model extends CI_Model {
         // start merging * from with this form.
         foreach ($this->forms[$form] as $key => $value)
         {
-            foreach (['field'=>'', 'rules'=>'', 'label'=>'', 'class'=>'', 'type'=>'text'] as $merge_key => $merge_value)
+            foreach (['field'=>'', 'rules'=>'', 'label'=>'', 'class'=>'', 'type'=>'text', 'alias'=>''] as $merge_key => $merge_value)
             {
                 if(!isset($this->forms[$form][$key][$merge_key]))
                 {
@@ -516,15 +536,15 @@ class ER_Model extends CI_Model {
         // if user is available check user permission
         if($this->getCreateBy())
         {
-            if(($permission == 'show' || $permission == 'list') && in_array($userOctal, [4,5,6,7]) && $this->getCreateBy() == $ci->userdata->user_id)
+            if(($permission == 'show' || $permission == 'list') && in_array($userOctal, [4,5,6,7]) && $this->getCreateBy() == get_user_id())
             {
                 return TRUE;
             }
-            if($permission == 'edit' && in_array($userOctal, [2,3,6,7]) && $this->getCreateBy() == $ci->userdata->user_id)
+            if($permission == 'edit' && in_array($userOctal, [2,3,6,7]) && $this->getCreateBy() == get_user_id())
             {
                 return TRUE;
             }
-            if($permission == 'delete' && in_array($userOctal, [1,3,5,7]) && $this->getCreateBy() == $ci->userdata->user_id)
+            if($permission == 'delete' && in_array($userOctal, [1,3,5,7]) && $this->getCreateBy() == get_user_id())
             {
                 return TRUE;
             }
@@ -592,82 +612,40 @@ class ER_Model extends CI_Model {
     }
 
     /**
-     * load related model.
-     *
-     * @param  string  $relation class name
-     * @return object of $related class
-     */
-    public function loadRelated($relation)
-    {
-        return load_model($relation);
-    }
-
-    /**
-     * one-to-one relationship.
-     *
-     * @param  string  $relation class name
-     * @param  string  $foreignKey name
-     * @param  string  $otherKey  name
-     * @return object of $related class
-     */
-    public function hasOne($relation, $foreignKey = NULL, $otherKey = NULL)
-    {
-        if($this->loadRelated($relation))
-        {
-            $otherKey   = ($otherKey    === NULL)?$this->loadRelated($relation)->getKeyName:$otherKey;
-            $foreignKey = ($foreignKey  === NULL)?$this->getForeignKey($this->$relation->getKeyName()):$foreignKey;
-            return $this->loadRelated($relation)->row([$otherKey=>$this->$foreignKey]);
-        }
-    }
-
-    /**
-     * one-to-many relationship.
-     *
-     * @param  string  $relation class name
-     * @param  string  $foreignKey name
-     * @param  string  $otherKey  name
-     * @return object of $related class
-     */
-    public function hasMany($relation, $foreignKey = NULL, $otherKey = NULL)
-    {
-        if($this->loadRelated($relation))
-        {
-            $otherKey   = ($otherKey    === NULL)?$this->loadRelated($relation)->getKeyName:$otherKey;
-            $foreignKey = ($foreignKey  === NULL)?$this->getForeignKey($this->$relation->getKeyName()):$foreignKey;
-            return $this->loadRelated($relation)->rows([$otherKey=>$this->$foreignKey]);
-        }
-    }
-
-    /**
-     * loading related models
-     *
-     * @param  string|array  $relations
-     * @return  object or null
-     */
-    public function with($relations) {
-        if(!is_string($relations) || !is_array($relations))
-        {
-            $relations = func_get_args();
-        }
-        foreach ($relations as $key => $relation) {
-            if($this->loadRelated($relation))
-            {
-                $this->relations[$relation] = strtolower(preg_replace('#(.+)/#', '', $relation));
-            }
-        }
-        return $this;
-    }
-
-    /**
      * Find rows by where condition with limit and offset or return null.
      *
      * @return  object or null
      */
-    public function query($columns = ['*'], $where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function query($columns = ['*'], $where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
-        if(is_array($columns)){
+        if(is_array($columns))
+        {
             $columns = implode(',', $columns);
+            if(trim($columns) == '*')
+            {
+                $columns = $this->table.'.*';
+            }
         }
+
+        if($withRelations)
+        {
+            foreach ($this->relations as $key => $relation)
+            {
+                if(!is_array($relation) || !isset($relation['model'])) continue;
+                if(!isset($relation['alias'])) $relation['alias'] = $key;
+
+                $relation_table = load_model($relation['model'])->table;
+                $relation_alias = $relation_table.'_'.$relation['alias'];
+                $relation_forms = load_model($relation['model'])->forms['*'];
+                $relation_colmn = array_keys($relation_forms);
+                foreach ($relation_colmn as $key => $colmn)
+                {
+                    $relation_colmn[$key] = $relation_alias.'.'.$colmn.' AS '.$relation['alias'].'_'.$colmn;
+                }
+                $columns = $columns.','.implode(',', $relation_colmn);
+            }
+        }
+
         $this->db->reset_query();
         $this->db->select($columns);
         $this->db->from($this->table);
@@ -716,11 +694,31 @@ class ER_Model extends CI_Model {
             $this->db->order_by($this->orderBy);
         }
 
-        foreach ($this->relations as $key => $relation) {
-            $this->db->join($this->$relation->table, $this->$relation->getKeyName() .' = '.$this->getForeignKey($this->$relation->getKeyName()), 'LEFT');
+        if($withRelations)
+        {
+            foreach ($this->relations as $key => $relation)
+            {
+                if(!is_array($relation) || !isset($relation['model'])) continue;
+                if(!isset($relation['alias'])) $relation['alias'] = $key;
+                $relation_table = load_model($relation['model'])->table;
+                $relation_alias = $relation_table.'_'.$relation['alias'];
+                // prepare ON condition
+                $on_cond    = [];
+                $on_cond[]  = $relation_alias.'.'.$relation['key'] .' = '.$key;
+                if(isset($relation['where']) && preg_match('/\[([a-z0-9_]+)(\^=|\$=|\*=|=)([a-z0-9_]+)\]/Ui', $relation['where'], $match))
+                {
+                    if($match[2] == '^=') $on_cond[] = $relation_alias.'.'.$match[1].' LIKE \''.$match[3].'%\'';
+                    if($match[2] == '$=') $on_cond[] = $relation_alias.'.'.$match[1].' LIKE \'%'.$match[3].'\'';
+                    if($match[2] == '*=') $on_cond[] = $relation_alias.'.'.$match[1].' LIKE \'%'.$match[3].'%\'';
+                    if($match[2] == '=')  $on_cond[] = $relation_alias.'.'.$match[1].' = \''.$match[3].'\'';
+                }
+                $this->db->join($relation_table.' AS '.$relation_alias, implode(' AND ', $on_cond), 'LEFT');
+            }
         }
+
         return $this->db;
     }
+
 
     /**
      * Get all records
@@ -728,8 +726,8 @@ class ER_Model extends CI_Model {
      * @param  array  $columns
      * @return object
      */
-    public function all($columns = ['*']) {
-        return $this->query($columns)->get()->result(get_called_class());
+    public function all($columns = ['*'], $where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE) {
+        return $this->query($columns, $where, $limit, $offset, $order_by, $withRelations)->get()->result(get_called_class());
     }
 
     /**
@@ -749,9 +747,9 @@ class ER_Model extends CI_Model {
      *
      * @return  object or null
      */
-    public function row($where = NULL, $columns = ['*'])
+    public function row($where = NULL, $columns = ['*'], $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
-        $query = $this->query($columns, $where);
+        $query = $this->query($columns, $where, $limit, $offset, $order_by, $withRelations);
         return $query->get()->row(0, get_called_class());
     }
 
@@ -760,9 +758,9 @@ class ER_Model extends CI_Model {
      *
      * @return  array or null
      */
-    public function rows($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function rows($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
-        $query = $this->query(['*'], $where, $limit, $offset, $order_by);
+        $query = $this->query(['*'], $where, $limit, $offset, $order_by, $withRelations);
         return $query->get()->result(get_called_class());
     }
 
@@ -771,7 +769,7 @@ class ER_Model extends CI_Model {
      *
      * @return  array or null
      */
-    public function search($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function search($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
         foreach ($where as $key => $value) {
             if(trim($value) != '') {
@@ -779,7 +777,7 @@ class ER_Model extends CI_Model {
             }
             unset($where[$key]);
         }
-        $query = $this->query(['*'], $where, $limit, $offset, $order_by);
+        $query = $this->query(['*'], $where, $limit, $offset, $order_by, $withRelations);
         return $query->get()->result(get_called_class());
     }
 
@@ -788,7 +786,7 @@ class ER_Model extends CI_Model {
      *
      * @return  integer
      */
-    public function count_search($where = NULL)
+    public function count_search($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = FALSE)
     {
         foreach ($where as $key => $value) {
             if(trim($value) != '') {
@@ -796,7 +794,7 @@ class ER_Model extends CI_Model {
             }
             unset($where[$key]);
         }
-        $query = $this->query(['count(*) as count'], $where);
+        $query = $this->query(['count(*) as count'], $where, $limit, $offset, $order_by, $withRelations);
         $row   = $query->get()->row_object();
         return $row->count;
     }
@@ -806,9 +804,9 @@ class ER_Model extends CI_Model {
      *
      * @return  integer
      */
-    public function count($where = NULL)
+    public function count($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = FALSE)
     {
-        $query = $this->query(['count(*) as count'], $where);
+        $query = $this->query(['count(*) as count'], $where, $limit, $offset, $order_by, $withRelations);
         $row   = $query->get()->row_object();
         return $row->count;
     }
@@ -830,13 +828,12 @@ class ER_Model extends CI_Model {
      *
      * @return  object or null
      */
-    public function user_row($where = [], $limit = NULL, $offset = NULL)
+    public function user_row($where = [], $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
-            $where[$this->getCreateByName()] = $ci->userdata->user_id;
-            return $this->row($where, $limit, $offset);
+            $where[$this->getCreateByName()] = get_user_id();
+            return $this->row($where, $limit, $offset, $order_by, $withRelations);
         }
         show_error('Unable to find createBy field in '.get_called_class(), '500');
     }
@@ -846,13 +843,12 @@ class ER_Model extends CI_Model {
      *
      * @return  array or null
      */
-    public function user_rows($where = [], $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function user_rows($where = [], $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
-            $where[$this->getCreateByName()] = $ci->userdata->user_id;
-            return $this->rows($where, $limit, $offset, $order_by);
+            $where[$this->getCreateByName()] = get_user_id();
+            return $this->rows($where, $limit, $offset, $order_by, $withRelations);
         }
         show_error('Unable to find createBy field in '.get_called_class(), '500');
     }
@@ -862,20 +858,19 @@ class ER_Model extends CI_Model {
      *
      * @return  array or null
      */
-    public function user_search($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function user_search($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
             $where = (array) $where;
-            $where[$this->getCreateByName()] = $ci->userdata->user_id;
+            $where[$this->getCreateByName()] = get_user_id();
             foreach ($where as $key => $value) {
                 if(trim($value) != '') {
                     $where['like'][$key] = $value;
                 }
                 unset($where[$key]);
             }
-            $query = $this->query(['*'], $where, $limit, $offset, $order_by);
+            $query = $this->query(['*'], $where, $limit, $offset, $order_by, $withRelations);
             return $query->get()->result(get_called_class());
         }
         show_error('Unable to find createBy field in '.get_called_class(), '500');
@@ -886,20 +881,19 @@ class ER_Model extends CI_Model {
      *
      * @return  integer
      */
-    public function user_count_search($where = NULL)
+    public function user_count_search($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = FALSE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
             $where = (array) $where;
-            $where[$this->getCreateByName()] = $ci->userdata->user_id;
+            $where[$this->getCreateByName()] = get_user_id();
             foreach ($where as $key => $value) {
                 if(trim($value) != '') {
                     $where['like'][$key] = $value;
                 }
                 unset($where[$key]);
             }
-            $query = $this->query(['count(*) as count'], $where);
+            $query = $this->query(['count(*) as count'], $where, $limit, $offset, $order_by, $withRelations);
             $row   = $query->get()->row_object();
             return $row->count;
         }
@@ -911,14 +905,13 @@ class ER_Model extends CI_Model {
      *
      * @return  integer
      */
-    public function user_count($where = NULL)
+    public function user_count($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = FALSE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
             $where = (array) $where;
-            $where[$this->getCreateByName()] = $ci->userdata->user_id;
-            $query = $this->query(['count(*) as count'], $where);
+            $where[$this->getCreateByName()] = get_user_id();
+            $query = $this->query(['count(*) as count'], $where, $limit, $offset, $order_by, $withRelations);
             $row   = $query->get()->row_object();
             return $row->count;
         }
@@ -942,14 +935,13 @@ class ER_Model extends CI_Model {
      *
      * @return  object or null
      */
-    public function group_row($where = [], $limit = NULL, $offset = NULL)
+    public function group_row($where = [], $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
             $sql = '(SELECT rel_user_id FROM `er_users_rels` WHERE rel_group_id IN (
-                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.(int)$ci->userdata->user_id.'
-                    ) UNION SELECT '.(int)$ci->userdata->user_id.')';
+                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.get_user_id().'
+                    ) UNION SELECT '.get_user_id().')';
             $where['sql'][$this->getCreateByName().' IN '] = $sql;
             return $this->row($where, $limit, $offset);
         }
@@ -961,16 +953,15 @@ class ER_Model extends CI_Model {
      *
      * @return  array or null
      */
-    public function group_rows($where = [], $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function group_rows($where = [], $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
             $sql = '(SELECT rel_user_id FROM `er_users_rels` WHERE rel_group_id IN (
-                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.(int)$ci->userdata->user_id.'
-                    ) UNION SELECT '.(int)$ci->userdata->user_id.')';
+                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.get_user_id().'
+                    ) UNION SELECT '.get_user_id().')';
             $where['sql'][$this->getCreateByName().' IN '] = $sql;
-            return $this->rows($where, $limit, $offset, $order_by);
+            return $this->rows($where, $limit, $offset, $order_by, $withRelations);
         }
         show_error('Unable to find createBy field in '.get_called_class(), '500');
     }
@@ -980,15 +971,14 @@ class ER_Model extends CI_Model {
      *
      * @return  array or null
      */
-    public function group_search($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL)
+    public function group_search($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = TRUE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
             $where = (array) $where;
             $sql = '(SELECT rel_user_id FROM `er_users_rels` WHERE rel_group_id IN (
-                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.(int)$ci->userdata->user_id.'
-                    ) UNION SELECT '.(int)$ci->userdata->user_id.')';
+                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.get_user_id().'
+                    ) UNION SELECT '.get_user_id().')';
             $where['sql'][$this->getCreateByName().' IN '] = $sql;
             foreach ($where as $key => $value) {
                 if(trim($value) != '') {
@@ -996,7 +986,7 @@ class ER_Model extends CI_Model {
                 }
                 unset($where[$key]);
             }
-            $query = $this->query(['*'], $where, $limit, $offset, $order_by);
+            $query = $this->query(['*'], $where, $limit, $offset, $order_by, $withRelations);
             return $query->get()->result(get_called_class());
         }
         show_error('Unable to find createBy field in '.get_called_class(), '500');
@@ -1007,15 +997,14 @@ class ER_Model extends CI_Model {
      *
      * @return  integer
      */
-    public function group_count_search($where = NULL)
+    public function group_count_search($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = FALSE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
             $where = (array) $where;
             $sql = '(SELECT rel_user_id FROM `er_users_rels` WHERE rel_group_id IN (
-                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.(int)$ci->userdata->user_id.'
-                    ) UNION SELECT '.(int)$ci->userdata->user_id.')';
+                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.get_user_id().'
+                    ) UNION SELECT '.get_user_id().')';
             $where['sql'][$this->getCreateByName().' IN '] = $sql;
             foreach ($where as $key => $value) {
                 if(trim($value) != '') {
@@ -1023,7 +1012,7 @@ class ER_Model extends CI_Model {
                 }
                 unset($where[$key]);
             }
-            $query = $this->query(['count(*) as count'], $where);
+            $query = $this->query(['count(*) as count'], $where, $limit, $offset, $order_by, $withRelations);
             $row   = $query->get()->row_object();
             return $row->count;
         }
@@ -1035,17 +1024,16 @@ class ER_Model extends CI_Model {
      *
      * @return  integer
      */
-    public function group_count($where = NULL)
+    public function group_count($where = NULL, $limit = NULL, $offset = NULL, $order_by = NULL, $withRelations = FALSE)
     {
-        $ci = &get_instance();
         if($this->getCreateByName())
         {
             $where = (array) $where;
             $sql = '(SELECT rel_user_id FROM `er_users_rels` WHERE rel_group_id IN (
-                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.(int)$ci->userdata->user_id.'
-                    ) UNION SELECT '.(int)$ci->userdata->user_id.')';
+                        SELECT rel_group_id FROM `er_users_rels` WHERE rel_user_id ='.get_user_id().'
+                    ) UNION SELECT '.get_user_id().')';
             $where['sql'][$this->getCreateByName().' IN '] = $sql;
-            $query = $this->query(['count(*) as count'], $where);
+            $query = $this->query(['count(*) as count'], $where, $limit, $offset, $order_by, $withRelations);
             $row   = $query->get()->row_object();
             return $row->count;
         }
@@ -1075,7 +1063,7 @@ class ER_Model extends CI_Model {
             {
                 if(is_object($this->session->userdata('userdata')))
                 {
-                    $data[$field] = $this->session->userdata('userdata')->user_id;
+                    $data[$field] = get_user_id();
                 }
                 else
                 {
@@ -1090,7 +1078,7 @@ class ER_Model extends CI_Model {
             {
                 if(is_object($this->session->userdata('userdata')))
                 {
-                    $data[$field] = $this->session->userdata('userdata')->user_id;
+                    $data[$field] = get_user_id();
                 }
                 else
                 {
@@ -1134,7 +1122,7 @@ class ER_Model extends CI_Model {
                 {
                     if(is_object($this->session->userdata('userdata')))
                     {
-                        $data[$field] = $this->session->userdata('userdata')->user_id;
+                        $data[$field] = get_user_id();
                     }
                     else
                     {

@@ -150,7 +150,7 @@
                     <!-- user login dropdown start-->
                     <li class="dropdown text-center">
                         <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                            <img alt="<?php echo get_instance()->userdata('user_name')?>" src="<?php echo base_url(); ?>assets/avatars/<?php echo get_instance()->userdata('user_avatar') ?>" class="img-circle profile-img thumb-sm">
+                            <img alt="<?php echo get_instance()->userdata('user_name')?>" src="<?php echo base_url(); ?><?php echo get_instance()->userdata('user_avatar') ?>" class="img-circle profile-img thumb-sm">
                             <span class="username"><?php echo get_instance()->userdata('user_name')?> </span> <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu extended pro-menu fadeInUp animated" tabindex="5003" style="overflow: hidden; outline: none;">

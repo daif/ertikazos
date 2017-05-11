@@ -111,7 +111,8 @@ class User_model extends ER_Model {
             'user_type' => [
                 'field' => 'user_type',
                 'rules' => 'required|integer',
-                'type'  => 'select:hasOne[Admin/Setting][value][name^=user_type]'
+                'type'  => 'select:hasOne[Admin/Setting][value][name^=user_type]',
+                'alias' => 'user_type_name'
             ],
             'user_name' => [
                 'field' => 'user_name',
@@ -126,11 +127,6 @@ class User_model extends ER_Model {
                 'rules' => 'min_length[8]|max_length[16]',
                 'type'  => 'password'
             ],
-            'user_pconf' => [
-                'field'  => 'user_pconf',
-                'rules'  => 'required|matches[user_pass]',
-                'type'   => 'password'
-            ],
             'user_mobile' => [
                 'field' => 'user_mobile',
                 'rules' => 'required|min_length[10]',
@@ -139,7 +135,7 @@ class User_model extends ER_Model {
             'user_avatar' => [
                 'field' => 'user_avatar',
                 'rules'  => '',
-                'type'  => 'select:hasOne[Admin/User::avatars][avatar]'
+                'type'  => 'file'
             ],
             'user_code' => [
                 'field' => 'user_code',
@@ -148,7 +144,8 @@ class User_model extends ER_Model {
             'user_status'  => [
                 'field' => 'user_status',
                 'rules' => 'required|integer',
-                'type'  => 'select:hasOne[Admin/Setting][value][name^=user_status]'
+                'type'  => 'select:hasOne[Admin/Setting][value][name^=user_status]',
+                'alias' => 'user_status_name'
             ],
         ],
         'list' => [
@@ -207,7 +204,11 @@ class User_model extends ER_Model {
                 'rules'   =>'required|valid_email|is_unique[er_users.user_email]'
             ],
             'user_pass'  => [],
-            'user_pconf' => [],
+            'user_pconf' => [
+                'field'  => 'user_pconf',
+                'rules'  => 'required|matches[user_pass]',
+                'type'   => 'password'
+            ],
         ],
         'lost' => [
             'user_email' => [],
@@ -318,33 +319,6 @@ class User_model extends ER_Model {
             }
         }
         return FALSE;
-    }
-
-    public function avatars()
-    {
-        $this->load->helper('directory');
-        return directory_map(FCPATH.'assets/avatars/');
-    }
-
-    public function user_avatar()
-    {
-        if(strlen($this->user_avatar)>1)
-        {
-            return $this->user_avatar;
-        }
-        if(!file_exists(FCPATH.'assets/avatars/'.$this->user_id.'.jpg'))
-        {
-            $user_photo = get_user_photo($this->user_email);
-            if(strlen($user_photo)>100)
-            {
-                file_put_contents(FCPATH.'assets/avatars/'.$this->user_id.'.jpg', $user_photo);
-            }
-            else
-            {
-                copy(FCPATH.'assets/avatars/default.jpg',FCPATH.'assets/avatars/'.$this->user_id.'.jpg');
-            }
-        }
-        return $this->user_id.'.jpg';
     }
 
     public function notifications_count($status = 0)

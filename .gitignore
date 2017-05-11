@@ -20,3 +20,6 @@ application/packages/*
 public/uploads/*
 !public/uploads/index.html
 !public/uploads/.htaccess
+!public/uploads/avatars/
+!public/uploads/avatars/default.png
+!public/uploads/avatars/.htaccess

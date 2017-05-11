@@ -379,7 +379,7 @@ class Ertikazos_Seeder extends ER_Seeder {
                 'user_name'     => 'Admin User',
                 'user_email'    => 'admin@ertikazos.dev',
                 'user_pass'     => password_hash('12345678', PASSWORD_DEFAULT),
-                'user_avatar'   => 'avatar01.png',
+                'user_avatar'   => 'uploads/avatars/default.png',
                 'user_status'   => User_model::STATUS_ACTIVE
             ),
             array(
@@ -387,7 +387,7 @@ class Ertikazos_Seeder extends ER_Seeder {
                 'user_name'     => 'Normal User',
                 'user_email'    => 'user@ertikazos.dev',
                 'user_pass'     => password_hash('12345678', PASSWORD_DEFAULT),
-                'user_avatar'   => 'avatar01.png',
+                'user_avatar'   => 'uploads/avatars/default.png',
                 'user_status'   => User_model::STATUS_ACTIVE
             ),
         );

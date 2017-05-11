@@ -80,12 +80,14 @@ class Watchdog_model extends ER_Model {
             'log_app_id'  => [
                 'field' => 'log_app_id',
                 'rules' => 'integer',
-                'type'  => 'select:hasOne[Admin/App][app_id]'
+                'type'  => 'select:hasOne[Admin/App][app_id]',
+                'alias' => 'log_app_id_app_path'
             ],
             'log_user_id'  => [
                 'field' => 'log_user_id',
                 'rules' => 'integer',
-                'type'  => 'select:hasOne[Admin/User][user_id]'
+                'type'  => 'select:hasOne[Admin/User][user_id]',
+                'alias' => 'log_user_id_user_name'
             ],
             'log_variables'  => [
                 'field' => 'log_variables',
