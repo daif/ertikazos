@@ -28,6 +28,7 @@ class Seed_Command extends Command {
         {
             $fields = array('file_path' =>  array('type' => 'varchar', 'constraint' => 64));
             $this->dbforge->add_column(config_item('migration_table'), $fields);
+            $this->db->query('ALTER TABLE `'.config_item('migration_table').'` ADD UNIQUE (`version`, `file_path`)');
         }
     }
 

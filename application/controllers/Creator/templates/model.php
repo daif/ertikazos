@@ -108,8 +108,12 @@ class {class_name} extends ER_Model {
      */
     public $forms = [
         '*' => [
-            'input' => '',
-            'rules' => ''
+            'id' => [
+                'field' => 'id',
+                'rules' => 'integer',
+                'type'  => 'text',
+                'alias' => '',
+            ],
         ],
         'list' => [],
         'edit' => [], 

@@ -199,7 +199,6 @@ class User_model extends ER_Model {
             'user_avatar'  => [],
         ],
         'register' => [
-            'user_name'  => [],
             'user_email' => [
                 'rules'   =>'required|valid_email|is_unique[er_users.user_email]'
             ],

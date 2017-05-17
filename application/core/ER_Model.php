@@ -201,10 +201,11 @@ class ER_Model extends CI_Model {
     /**
      * get forms function
      *
-     * @param   string   $form the form name.
+     * @param   string  $form       the form name.
+     * @param   mixed   $index      Index for item to be fetched from $array
      * @return  array
      */
-    public function forms($form) {
+    public function forms($form, $index = NULL) {
         if(!isset($this->forms['*']) || !is_array($this->forms['*']))
         {
             show_error('$this->forms[\'*\'] array is not defined in '.get_called_class(), '500');
@@ -232,18 +233,30 @@ class ER_Model extends CI_Model {
                 }
             }
         }
+        // if $index is available 
+        if(is_array($index))
+        {
+            $output = [];
+            foreach ($index as $key => $value)
+            {
+                if(!isset($this->forms[$form][$key])) continue;
+                $output[$key] = $this->forms[$form][$key];
+            }
+            return $output;
+        }
         return $this->forms[$form];
     }
 
     /**
      * get rules for the form
      *
-     * @param   string   $form the form name.
+     * @param   string   $form       the form name.
+     * @param   mixed    $index      Index for item to be fetched from $array
      * @return  array
      */
-    public function rules($form) {
+    public function rules($form, $index = NULL) {
         $rules = [];
-        $form  = $this->forms($form);
+        $form  = $this->forms($form, $index);
         foreach ($form as $key => $value)
         {
             if(isset($form[$key]['rules']) && trim($form[$key]['rules']) != '')

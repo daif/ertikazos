@@ -52,7 +52,7 @@ class Migration_Ertikazos extends ER_Migration {
                     'null' => TRUE,
                 ),
             ),
-            'attributes' => array('ENGINE' => 'MyISAM'),
+            'attributes' => array('ENGINE' => 'InnoDB'),
         );
 
         // er_apps table
@@ -113,7 +113,7 @@ class Migration_Ertikazos extends ER_Migration {
                     'constraint' => 2,
                 ),
             ),
-            'attributes' => array('ENGINE' => 'MyISAM'),
+            'attributes' => array('ENGINE' => 'InnoDB'),
         );
 
         // er_groups table
@@ -156,7 +156,7 @@ class Migration_Ertikazos extends ER_Migration {
                     'default' => '0'
                 ),
             ),
-            'attributes' => array('ENGINE' => 'MyISAM'),
+            'attributes' => array('ENGINE' => 'InnoDB'),
         );
 
         // er_users table
@@ -182,7 +182,7 @@ class Migration_Ertikazos extends ER_Migration {
                 'user_email' => array(
                     'type' => 'VARCHAR',
                     'constraint' => '64',
-                    'key' => TRUE,
+                    'unique' => TRUE,
                 ),
                 'user_pass' => array(
                     'type' => 'VARCHAR',
@@ -232,7 +232,7 @@ class Migration_Ertikazos extends ER_Migration {
                     'default' => '0'
                 ),
             ),
-            'attributes' => array('ENGINE' => 'MyISAM'),
+            'attributes' => array('ENGINE' => 'InnoDB'),
         );
 
         // er_users_rels table
@@ -267,7 +267,7 @@ class Migration_Ertikazos extends ER_Migration {
                     'null' => TRUE
                 ),
             ),
-            'attributes' => array('ENGINE' => 'MyISAM'),
+            'attributes' => array('ENGINE' => 'InnoDB'),
         );
 
         // er_users_ses table
@@ -292,7 +292,7 @@ class Migration_Ertikazos extends ER_Migration {
                     'type' => 'BLOB',
                 )
             ),
-            'attributes' => array('ENGINE' => 'MyISAM'),
+            'attributes' => array('ENGINE' => 'InnoDB'),
         );
 
         // er_users_notify table
@@ -343,7 +343,7 @@ class Migration_Ertikazos extends ER_Migration {
                     'constraint' => 2,
                 ),
             ),
-            'attributes' => array('ENGINE' => 'MyISAM'),
+            'attributes' => array('ENGINE' => 'InnoDB'),
         );
 
         // er_permissions table
@@ -385,7 +385,7 @@ class Migration_Ertikazos extends ER_Migration {
                     'null' => TRUE
                 ),
             ),
-            'attributes' => array('ENGINE' => 'MyISAM'),
+            'attributes' => array('ENGINE' => 'InnoDB'),
         );
 
         // er_logs table
@@ -430,7 +430,7 @@ class Migration_Ertikazos extends ER_Migration {
                     'key' => TRUE,
                 ),
             ),
-            'attributes' => array('ENGINE' => 'MyISAM'),
+            'attributes' => array('ENGINE' => 'InnoDB'),
         );
     }
 
