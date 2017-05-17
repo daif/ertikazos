@@ -29,15 +29,6 @@ if ( ! function_exists('make_form_open'))
         } else {
             $attributes .= ' role="form" ';
         }
-        //auto add csrf token
-        if(is_array($hidden))
-        {
-            $hidden[get_instance()->security->get_csrf_token_name()] = get_instance()->security->get_csrf_hash();
-        }
-        else
-        {
-            $hidden = array(get_instance()->security->get_csrf_token_name()=>get_instance()->security->get_csrf_hash());
-        }
         return form_open_multipart($action, $attributes, $hidden);
     }
 }
