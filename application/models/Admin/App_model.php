@@ -242,6 +242,7 @@ class App_model extends ER_Model {
     public function getByPath($app_path)
     {
         $this->loadApps();
+        $app_path = trim($app_path, '/');
         if(isset($this->apps[$app_path]))
         {
             return $this->apps[$app_path];
